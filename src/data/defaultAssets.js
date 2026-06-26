@@ -174,76 +174,193 @@ function generateLivretSeries({ startPrice }) {
 }
 
 // ----------------------------------------------------------------------------
-//  Définition des actifs pré-chargés
+//  Éligibilité des enveloppes fiscales françaises (PEA / CTO / Assurance-vie)
+//
+//  Règles pédagogiques retenues :
+//   • PEA  : réservé aux actions de sociétés ayant leur siège dans l'UE / EEE,
+//            et aux ETF « éligibles PEA » (souvent synthétiques) qui répliquent
+//            des indices mondiaux ou hors-Europe. Pas d'or, pas d'obligations,
+//            pas d'actions américaines/suisses/britanniques/asiatiques en direct.
+//   • CTO  : aucune restriction — tous les actifs cotés sont éligibles.
+//   • AV   : unités de compte des contrats d'assurance-vie. En pratique : ETF,
+//            fonds et matières premières « papier » oui ; actions en direct non.
+//  Le Livret A est une épargne réglementée : aucune des trois enveloppes.
 // ----------------------------------------------------------------------------
-export const DEFAULT_ASSETS = [
+const PAYS_UE_EEE = new Set([
+  'France', 'Allemagne', 'Pays-Bas', 'Espagne', 'Italie', 'Danemark',
+  'Irlande', 'Belgique', 'Finlande', 'Portugal', 'Suède', 'Zone euro', 'Europe',
+])
+
+// Détermine l'éligibilité {pea, cto, av} à partir du type et de la région
+function deriveEnvelopes({ type, region, peaEligible }) {
+  if (type === 'Épargne') return { pea: false, cto: false, av: false }
+  if (type === 'Action') return { pea: PAYS_UE_EEE.has(region), cto: true, av: false }
+  if (type === 'Matière première') return { pea: false, cto: true, av: true }
+  // ETF / Indice : CTO + AV toujours, PEA selon le flag explicite
+  return { pea: !!peaEligible, cto: true, av: true }
+}
+
+// ----------------------------------------------------------------------------
+//  Fabrique d'actif « action » : génère la série et attache les métadonnées.
+//  Les graines (seed) sont attribuées de façon déterministe et incrémentale ;
+//  l'ordre du tableau de specs garantit la stabilité des courbes.
+// ----------------------------------------------------------------------------
+let _seedCounter = 1000
+function makeEquity(spec) {
+  _seedCounter += 7
+  return {
+    id: spec.id,
+    ticker: spec.ticker,
+    yahoo: spec.ticker,
+    name: spec.name,
+    description: spec.description,
+    type: spec.type || 'Action',
+    region: spec.region,
+    sector: spec.sector,
+    color: spec.color,
+    dividendYield: spec.dividendYield ?? 0,
+    envelopes: spec.envelopes || deriveEnvelopes({ type: spec.type || 'Action', region: spec.region, peaEligible: spec.peaEligible }),
+    series: generateEquitySeries({
+      seed: spec.seed ?? _seedCounter,
+      startPrice: spec.startPrice,
+      beta: spec.beta,
+      alphaAnnual: spec.alphaAnnual,
+      idioVol: spec.idioVol,
+    }),
+  }
+}
+
+// ----------------------------------------------------------------------------
+//  Indices & ETF historiques (graines d'origine conservées pour la stabilité)
+// ----------------------------------------------------------------------------
+const CORE_ASSETS = [
   {
-    id: 'sp500',
-    ticker: '^GSPC',
-    yahoo: '^GSPC',
-    name: 'S&P 500',
+    id: 'sp500', ticker: '^GSPC', name: 'S&P 500',
     description: '500 plus grandes capitalisations américaines',
-    type: 'Indice',
-    color: '#2563eb',
-    dividendYield: 0.018, // rendement du dividende annuel
+    type: 'Indice', region: 'États-Unis', sector: 'Indice large', color: '#2563eb',
+    dividendYield: 0.018, peaEligible: true, // répliqué par des ETF éligibles PEA (ex : Amundi PEA S&P 500)
     series: generateEquitySeries({ seed: 101, startPrice: 1425, beta: 1.0, alphaAnnual: 0.006, idioVol: 0.012 }),
   },
   {
-    id: 'msci-world',
-    ticker: 'URTH',
-    yahoo: 'URTH',
-    name: 'MSCI World',
+    id: 'msci-world', ticker: 'URTH', name: 'MSCI World',
     description: 'Actions des pays développés (~1500 sociétés)',
-    type: 'ETF',
-    color: '#0891b2',
-    dividendYield: 0.02,
+    type: 'ETF', region: 'Monde', sector: 'Indice large', color: '#0891b2',
+    dividendYield: 0.02, peaEligible: true, // ETF World éligibles PEA (ex : Amundi PEA Monde)
     series: generateEquitySeries({ seed: 202, startPrice: 1000, beta: 0.92, alphaAnnual: 0.002, idioVol: 0.009 }),
   },
   {
-    id: 'cac40',
-    ticker: '^FCHI',
-    yahoo: '^FCHI',
-    name: 'CAC 40',
+    id: 'cac40', ticker: '^FCHI', name: 'CAC 40',
     description: '40 plus grandes capitalisations françaises',
-    type: 'Indice',
-    color: '#7c3aed',
-    dividendYield: 0.03,
+    type: 'Indice', region: 'France', sector: 'Indice large', color: '#7c3aed',
+    dividendYield: 0.03, peaEligible: true,
     series: generateEquitySeries({ seed: 303, startPrice: 5900, beta: 1.0, alphaAnnual: -0.022, idioVol: 0.016 }),
   },
   {
-    id: 'nasdaq100',
-    ticker: '^NDX',
-    yahoo: '^NDX',
-    name: 'Nasdaq 100',
+    id: 'nasdaq100', ticker: '^NDX', name: 'Nasdaq 100',
     description: '100 plus grandes valeurs technologiques américaines',
-    type: 'Indice',
-    color: '#db2777',
-    dividendYield: 0.008,
+    type: 'Indice', region: 'États-Unis', sector: 'Technologie', color: '#db2777',
+    dividendYield: 0.008, peaEligible: true, // ETF Nasdaq éligibles PEA (ex : Amundi PEA Nasdaq-100)
     series: generateEquitySeries({ seed: 404, startPrice: 3700, beta: 1.32, alphaAnnual: 0.028, idioVol: 0.02 }),
   },
   {
-    id: 'gold',
-    ticker: 'GC=F',
-    yahoo: 'GC=F',
-    name: 'Or',
+    id: 'gold', ticker: 'GC=F', name: 'Or',
     description: 'Once d\'or (valeur refuge)',
-    type: 'Matière première',
-    color: '#d97706',
+    type: 'Matière première', region: 'Monde', sector: 'Métaux précieux', color: '#d97706',
     dividendYield: 0,
     series: generateGoldSeries({ seed: 505, startPrice: 280, idioVol: 0.012 }),
   },
   {
-    id: 'livret-a',
-    ticker: 'LIVRET-A',
-    yahoo: null, // pas de cotation : taux réglementé
-    name: 'Livret A',
+    id: 'livret-a', ticker: 'LIVRET-A', name: 'Livret A',
     description: 'Épargne réglementée garantie par l\'État (taux fixe)',
-    type: 'Épargne',
-    color: '#16a34a',
-    dividendYield: 0,
-    isCash: true,
+    type: 'Épargne', region: 'France', sector: 'Épargne réglementée', color: '#16a34a',
+    dividendYield: 0, isCash: true,
     series: generateLivretSeries({ startPrice: 100 }),
   },
+].map((a) => ({
+  ...a,
+  yahoo: a.id === 'livret-a' ? null : a.ticker,
+  envelopes: deriveEnvelopes(a),
+}))
+
+// ----------------------------------------------------------------------------
+//  ETF supplémentaires (zones géographiques, secteurs, obligations)
+// ----------------------------------------------------------------------------
+const ETF_SPECS = [
+  { id: 'msci-em', ticker: 'IEMG', name: 'MSCI Emerging Markets', sector: 'Indice large', region: 'Émergents', type: 'ETF', color: '#0d9488', dividendYield: 0.025, peaEligible: true, startPrice: 1000, beta: 1.1, alphaAnnual: -0.012, idioVol: 0.02, description: 'Actions des pays émergents (Chine, Inde, Brésil…)' },
+  { id: 'stoxx600', ticker: 'EXSA.DE', name: 'STOXX Europe 600', sector: 'Indice large', region: 'Europe', type: 'ETF', color: '#6366f1', dividendYield: 0.03, peaEligible: true, startPrice: 200, beta: 0.85, alphaAnnual: -0.004, idioVol: 0.012, description: '600 grandes & moyennes capitalisations européennes' },
+  { id: 'eurostoxx50', ticker: '^STOXX50E', name: 'Euro Stoxx 50', sector: 'Indice large', region: 'Zone euro', type: 'ETF', color: '#8b5cf6', dividendYield: 0.032, peaEligible: true, startPrice: 3800, beta: 0.95, alphaAnnual: -0.012, idioVol: 0.014, description: '50 plus grandes capitalisations de la zone euro' },
+  { id: 'world-esg', ticker: 'SUSW.L', name: 'MSCI World SRI (ESG)', sector: 'ISR / ESG', region: 'Monde', type: 'ETF', color: '#22c55e', dividendYield: 0.018, peaEligible: true, startPrice: 1000, beta: 0.9, alphaAnnual: 0.004, idioVol: 0.01, description: 'Actions mondiales filtrées selon des critères ESG' },
+  { id: 'russell2000', ticker: 'IWM', name: 'Russell 2000', sector: 'Petites capitalisations', region: 'États-Unis', type: 'ETF', color: '#f97316', dividendYield: 0.013, peaEligible: false, startPrice: 500, beta: 1.2, alphaAnnual: -0.004, idioVol: 0.022, description: '2000 petites capitalisations américaines' },
+  { id: 'topix', ticker: '^TPX', name: 'TOPIX Japon', sector: 'Indice large', region: 'Japon', type: 'ETF', color: '#ef4444', dividendYield: 0.02, peaEligible: false, startPrice: 1500, beta: 0.7, alphaAnnual: -0.008, idioVol: 0.02, description: "Indice large de la bourse de Tokyo" },
+  { id: 'msci-india', ticker: 'INDA', name: 'MSCI India', sector: 'Indice pays', region: 'Inde', type: 'ETF', color: '#f59e0b', dividendYield: 0.012, peaEligible: false, startPrice: 300, beta: 0.9, alphaAnnual: 0.02, idioVol: 0.03, description: 'Actions indiennes (forte croissance)' },
+  { id: 'world-tech', ticker: 'XDWT.DE', name: 'MSCI World Technology', sector: 'Technologie', region: 'Monde', type: 'ETF', color: '#3b82f6', dividendYield: 0.006, peaEligible: false, startPrice: 200, beta: 1.25, alphaAnnual: 0.02, idioVol: 0.018, description: 'Valeurs technologiques mondiales' },
+  { id: 'clean-energy', ticker: 'ICLN', name: 'Énergies propres', sector: 'Énergie / Thématique', region: 'Monde', type: 'ETF', color: '#10b981', dividendYield: 0.008, peaEligible: false, startPrice: 100, beta: 1.15, alphaAnnual: -0.01, idioVol: 0.03, description: 'Producteurs mondiaux d\'énergies renouvelables' },
+  { id: 'oblig-euro', ticker: 'IEAG.AS', name: 'Obligations d\'État euro', sector: 'Obligations', region: 'Zone euro', type: 'ETF', color: '#64748b', dividendYield: 0.022, peaEligible: false, startPrice: 200, beta: 0.06, alphaAnnual: -0.004, idioVol: 0.008, description: 'Emprunts d\'État de la zone euro (faible risque)' },
+]
+
+// ----------------------------------------------------------------------------
+//  Actions de référence — diversifiées par pays et par secteur
+// ----------------------------------------------------------------------------
+const STOCK_SPECS = [
+  // --- États-Unis (non éligibles PEA, hors AV) ---
+  { id: 'apple', ticker: 'AAPL', name: 'Apple', sector: 'Technologie', region: 'États-Unis', color: '#374151', dividendYield: 0.006, startPrice: 30, beta: 1.15, alphaAnnual: 0.06, idioVol: 0.06, description: 'Électronique grand public & services (iPhone, Mac)' },
+  { id: 'microsoft', ticker: 'MSFT', name: 'Microsoft', sector: 'Technologie', region: 'États-Unis', color: '#2563eb', dividendYield: 0.008, startPrice: 40, beta: 1.05, alphaAnnual: 0.05, idioVol: 0.05, description: 'Logiciels, cloud (Azure) & IA' },
+  { id: 'amazon', ticker: 'AMZN', name: 'Amazon', sector: 'Conso. discrétionnaire', region: 'États-Unis', color: '#f59e0b', dividendYield: 0, startPrice: 50, beta: 1.2, alphaAnnual: 0.06, idioVol: 0.07, description: 'E-commerce & cloud (AWS)' },
+  { id: 'alphabet', ticker: 'GOOGL', name: 'Alphabet (Google)', sector: 'Technologie', region: 'États-Unis', color: '#dc2626', dividendYield: 0.004, startPrice: 50, beta: 1.05, alphaAnnual: 0.045, idioVol: 0.055, description: 'Publicité en ligne, recherche & IA' },
+  { id: 'nvidia', ticker: 'NVDA', name: 'Nvidia', sector: 'Semi-conducteurs', region: 'États-Unis', color: '#16a34a', dividendYield: 0.001, startPrice: 5, beta: 1.5, alphaAnnual: 0.12, idioVol: 0.12, description: 'Processeurs graphiques & puces IA' },
+  { id: 'tesla', ticker: 'TSLA', name: 'Tesla', sector: 'Automobile', region: 'États-Unis', color: '#b91c1c', dividendYield: 0, startPrice: 10, beta: 1.6, alphaAnnual: 0.10, idioVol: 0.14, description: 'Véhicules électriques & stockage d\'énergie' },
+  { id: 'meta', ticker: 'META', name: 'Meta (Facebook)', sector: 'Technologie', region: 'États-Unis', color: '#1d4ed8', dividendYield: 0.004, startPrice: 40, beta: 1.2, alphaAnnual: 0.05, idioVol: 0.08, description: 'Réseaux sociaux & métavers' },
+  { id: 'coca-cola', ticker: 'KO', name: 'Coca-Cola', sector: 'Conso. de base', region: 'États-Unis', color: '#ef4444', dividendYield: 0.03, startPrice: 30, beta: 0.6, alphaAnnual: 0.005, idioVol: 0.035, description: 'Boissons (défensive, dividende régulier)' },
+  { id: 'jnj', ticker: 'JNJ', name: 'Johnson & Johnson', sector: 'Santé', region: 'États-Unis', color: '#be123c', dividendYield: 0.025, startPrice: 40, beta: 0.55, alphaAnnual: 0.01, idioVol: 0.03, description: 'Pharmacie & dispositifs médicaux' },
+  { id: 'jpmorgan', ticker: 'JPM', name: 'JPMorgan Chase', sector: 'Finance', region: 'États-Unis', color: '#1e40af', dividendYield: 0.025, startPrice: 40, beta: 1.1, alphaAnnual: 0.02, idioVol: 0.05, description: 'Première banque américaine' },
+  { id: 'visa', ticker: 'V', name: 'Visa', sector: 'Paiements', region: 'États-Unis', color: '#1e3a8a', dividendYield: 0.007, startPrice: 20, beta: 1.0, alphaAnnual: 0.06, idioVol: 0.05, description: 'Réseau mondial de paiement par carte' },
+  { id: 'berkshire', ticker: 'BRK-B', name: 'Berkshire Hathaway', sector: 'Holding', region: 'États-Unis', color: '#0f172a', dividendYield: 0, startPrice: 1500, beta: 0.85, alphaAnnual: 0.02, idioVol: 0.03, description: 'Conglomérat de Warren Buffett' },
+  { id: 'mcdonalds', ticker: 'MCD', name: 'McDonald\'s', sector: 'Conso. discrétionnaire', region: 'États-Unis', color: '#ca8a04', dividendYield: 0.022, startPrice: 35, beta: 0.6, alphaAnnual: 0.03, idioVol: 0.03, description: 'Restauration rapide mondiale' },
+
+  // --- France (éligibles PEA) ---
+  { id: 'lvmh', ticker: 'MC.PA', name: 'LVMH', sector: 'Luxe', region: 'France', color: '#854d0e', dividendYield: 0.015, startPrice: 45, beta: 1.0, alphaAnnual: 0.06, idioVol: 0.05, description: 'Numéro un mondial du luxe (Vuitton, Dior)' },
+  { id: 'hermes', ticker: 'RMS.PA', name: 'Hermès', sector: 'Luxe', region: 'France', color: '#a16207', dividendYield: 0.008, startPrice: 60, beta: 0.9, alphaAnnual: 0.08, idioVol: 0.05, description: 'Maison de luxe (maroquinerie, soie)' },
+  { id: 'totalenergies', ticker: 'TTE.PA', name: 'TotalEnergies', sector: 'Énergie', region: 'France', color: '#dc2626', dividendYield: 0.05, startPrice: 40, beta: 0.9, alphaAnnual: 0.02, idioVol: 0.05, description: 'Major pétrolière & gazière, transition énergétique' },
+  { id: 'loreal', ticker: 'OR.PA', name: 'L\'Oréal', sector: 'Conso. de base', region: 'France', color: '#9d174d', dividendYield: 0.015, startPrice: 70, beta: 0.8, alphaAnnual: 0.05, idioVol: 0.04, description: 'Numéro un mondial des cosmétiques' },
+  { id: 'sanofi', ticker: 'SAN.PA', name: 'Sanofi', sector: 'Santé', region: 'France', color: '#7c3aed', dividendYield: 0.035, startPrice: 55, beta: 0.6, alphaAnnual: 0.01, idioVol: 0.04, description: 'Laboratoire pharmaceutique' },
+  { id: 'airbus', ticker: 'AIR.PA', name: 'Airbus', sector: 'Aéronautique', region: 'France', color: '#0369a1', dividendYield: 0.015, startPrice: 15, beta: 1.2, alphaAnnual: 0.04, idioVol: 0.06, description: 'Avionneur européen' },
+  { id: 'airliquide', ticker: 'AI.PA', name: 'Air Liquide', sector: 'Chimie / Industrie', region: 'France', color: '#0e7490', dividendYield: 0.02, startPrice: 35, beta: 0.75, alphaAnnual: 0.035, idioVol: 0.035, description: 'Gaz industriels & médicaux' },
+  { id: 'schneider', ticker: 'SU.PA', name: 'Schneider Electric', sector: 'Industrie', region: 'France', color: '#15803d', dividendYield: 0.02, startPrice: 50, beta: 1.1, alphaAnnual: 0.05, idioVol: 0.05, description: 'Gestion de l\'énergie & automatismes' },
+  { id: 'bnp', ticker: 'BNP.PA', name: 'BNP Paribas', sector: 'Banque', region: 'France', color: '#047857', dividendYield: 0.04, startPrice: 90, beta: 1.3, alphaAnnual: -0.01, idioVol: 0.06, description: 'Première banque de la zone euro' },
+
+  // --- Europe hors France (éligibles PEA) ---
+  { id: 'asml', ticker: 'ASML.AS', name: 'ASML', sector: 'Semi-conducteurs', region: 'Pays-Bas', color: '#2563eb', dividendYield: 0.008, startPrice: 25, beta: 1.3, alphaAnnual: 0.10, idioVol: 0.08, description: 'Machines de lithographie (monopole mondial)' },
+  { id: 'sap', ticker: 'SAP.DE', name: 'SAP', sector: 'Technologie', region: 'Allemagne', color: '#0ea5e9', dividendYield: 0.015, startPrice: 40, beta: 0.9, alphaAnnual: 0.03, idioVol: 0.045, description: 'Logiciels de gestion d\'entreprise (ERP)' },
+  { id: 'siemens', ticker: 'SIE.DE', name: 'Siemens', sector: 'Industrie', region: 'Allemagne', color: '#0d9488', dividendYield: 0.025, startPrice: 60, beta: 1.1, alphaAnnual: 0.025, idioVol: 0.05, description: 'Conglomérat industriel & technologique' },
+  { id: 'volkswagen', ticker: 'VOW3.DE', name: 'Volkswagen', sector: 'Automobile', region: 'Allemagne', color: '#1e3a8a', dividendYield: 0.04, startPrice: 50, beta: 1.2, alphaAnnual: 0.0, idioVol: 0.06, description: 'Premier constructeur automobile européen' },
+  { id: 'allianz', ticker: 'ALV.DE', name: 'Allianz', sector: 'Assurance', region: 'Allemagne', color: '#1d4ed8', dividendYield: 0.04, startPrice: 90, beta: 1.0, alphaAnnual: 0.02, idioVol: 0.045, description: 'Assureur & gestionnaire d\'actifs mondial' },
+  { id: 'inditex', ticker: 'ITX.MC', name: 'Inditex (Zara)', sector: 'Distribution', region: 'Espagne', color: '#ca8a04', dividendYield: 0.025, startPrice: 10, beta: 0.85, alphaAnnual: 0.05, idioVol: 0.05, description: 'Distribution de mode (Zara, Bershka)' },
+  { id: 'novonordisk', ticker: 'NOVO-B.CO', name: 'Novo Nordisk', sector: 'Santé', region: 'Danemark', color: '#0891b2', dividendYield: 0.013, startPrice: 5, beta: 0.7, alphaAnnual: 0.08, idioVol: 0.06, description: 'Leader du diabète & de l\'obésité (Ozempic)' },
+  { id: 'ferrari', ticker: 'RACE.MI', name: 'Ferrari', sector: 'Luxe / Automobile', region: 'Italie', color: '#dc2626', dividendYield: 0.007, startPrice: 50, beta: 0.9, alphaAnnual: 0.09, idioVol: 0.06, description: 'Voitures de sport de luxe' },
+
+  // --- Suisse / Royaume-Uni (hors PEA — CTO uniquement) ---
+  { id: 'nestle', ticker: 'NESN.SW', name: 'Nestlé', sector: 'Conso. de base', region: 'Suisse', color: '#b91c1c', dividendYield: 0.026, startPrice: 40, beta: 0.6, alphaAnnual: 0.02, idioVol: 0.035, description: 'Premier groupe agroalimentaire mondial' },
+  { id: 'novartis', ticker: 'NOVN.SW', name: 'Novartis', sector: 'Santé', region: 'Suisse', color: '#e11d48', dividendYield: 0.035, startPrice: 50, beta: 0.6, alphaAnnual: 0.015, idioVol: 0.04, description: 'Laboratoire pharmaceutique suisse' },
+  { id: 'roche', ticker: 'ROG.SW', name: 'Roche', sector: 'Santé', region: 'Suisse', color: '#0f766e', dividendYield: 0.03, startPrice: 90, beta: 0.6, alphaAnnual: 0.015, idioVol: 0.04, description: 'Pharmacie & diagnostic' },
+  { id: 'shell', ticker: 'SHEL.L', name: 'Shell', sector: 'Énergie', region: 'Royaume-Uni', color: '#eab308', dividendYield: 0.05, startPrice: 40, beta: 0.95, alphaAnnual: 0.01, idioVol: 0.05, description: 'Major pétrolière & gazière britannique' },
+  { id: 'astrazeneca', ticker: 'AZN.L', name: 'AstraZeneca', sector: 'Santé', region: 'Royaume-Uni', color: '#9333ea', dividendYield: 0.025, startPrice: 30, beta: 0.6, alphaAnnual: 0.04, idioVol: 0.045, description: 'Laboratoire pharmaceutique britannique' },
+  { id: 'hsbc', ticker: 'HSBA.L', name: 'HSBC', sector: 'Banque', region: 'Royaume-Uni', color: '#dc2626', dividendYield: 0.05, startPrice: 40, beta: 1.1, alphaAnnual: -0.005, idioVol: 0.05, description: 'Banque internationale (Europe / Asie)' },
+
+  // --- Asie (hors PEA — CTO uniquement) ---
+  { id: 'toyota', ticker: '7203.T', name: 'Toyota', sector: 'Automobile', region: 'Japon', color: '#b91c1c', dividendYield: 0.025, startPrice: 30, beta: 0.8, alphaAnnual: 0.02, idioVol: 0.045, description: 'Premier constructeur automobile mondial' },
+  { id: 'tsmc', ticker: 'TSM', name: 'TSMC', sector: 'Semi-conducteurs', region: 'Taïwan', color: '#dc2626', dividendYield: 0.018, startPrice: 10, beta: 1.2, alphaAnnual: 0.08, idioVol: 0.07, description: 'Premier fondeur mondial de puces' },
+  { id: 'samsung', ticker: '005930.KS', name: 'Samsung Electronics', sector: 'Technologie', region: 'Corée du Sud', color: '#1d4ed8', dividendYield: 0.02, startPrice: 15, beta: 1.0, alphaAnnual: 0.04, idioVol: 0.06, description: 'Électronique, mémoires & smartphones' },
+  { id: 'alibaba', ticker: 'BABA', name: 'Alibaba', sector: 'Conso. / Technologie', region: 'Chine', color: '#ea580c', dividendYield: 0, startPrice: 90, beta: 1.2, alphaAnnual: -0.02, idioVol: 0.10, description: 'E-commerce & cloud chinois' },
+  { id: 'tencent', ticker: '0700.HK', name: 'Tencent', sector: 'Technologie', region: 'Chine', color: '#16a34a', dividendYield: 0.003, startPrice: 10, beta: 1.2, alphaAnnual: 0.03, idioVol: 0.09, description: 'Jeux vidéo, WeChat & investissements' },
+]
+
+// ----------------------------------------------------------------------------
+//  Définition finale des actifs pré-chargés
+// ----------------------------------------------------------------------------
+export const DEFAULT_ASSETS = [
+  ...CORE_ASSETS,
+  ...ETF_SPECS.map(makeEquity),
+  ...STOCK_SPECS.map(makeEquity),
 ]
 
 // ----------------------------------------------------------------------------
@@ -278,16 +395,25 @@ export function getAssetById(id) {
   return DEFAULT_ASSETS.find((a) => a.id === id) || null
 }
 
-// Recherche simple par nom ou ticker (insensible à la casse / accents)
+// Recherche simple par nom, ticker, secteur, région ou description
 export function searchAssets(query) {
   const q = (query || '').trim().toLowerCase()
   if (!q) return DEFAULT_ASSETS
-  return DEFAULT_ASSETS.filter(
-    (a) =>
-      a.name.toLowerCase().includes(q) ||
-      a.ticker.toLowerCase().includes(q) ||
-      a.description.toLowerCase().includes(q),
+  return DEFAULT_ASSETS.filter((a) =>
+    [a.name, a.ticker, a.description, a.sector, a.region, a.type]
+      .filter(Boolean)
+      .some((field) => field.toLowerCase().includes(q)),
   )
+}
+
+// Libellés courts des enveloppes éligibles d'un actif (ex : ['PEA','CTO'])
+export function eligibleEnvelopeLabels(asset) {
+  const e = asset?.envelopes || {}
+  const out = []
+  if (e.pea) out.push('PEA')
+  if (e.cto) out.push('CTO')
+  if (e.av) out.push('AV')
+  return out
 }
 
 export const DATA_START = `${START_YEAR}-${String(START_MONTH).padStart(2, '0')}-01`

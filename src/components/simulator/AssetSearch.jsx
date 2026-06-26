@@ -5,6 +5,37 @@
 import { useState, useMemo } from 'react'
 import { Search, Plus, X, Scale } from 'lucide-react'
 
+// Pastilles d'éligibilité aux enveloppes fiscales (PEA / CTO / Assurance-vie)
+function EnvelopeBadges({ envelopes, size = 'sm' }) {
+  if (!envelopes) return null
+  const items = [
+    { key: 'pea', label: 'PEA', title: 'Éligible au PEA' },
+    { key: 'cto', label: 'CTO', title: 'Éligible au compte-titres' },
+    { key: 'av', label: 'AV', title: 'Disponible en assurance-vie' },
+  ]
+  const pad = size === 'sm' ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-0.5 text-xs'
+  return (
+    <span className="flex shrink-0 items-center gap-1">
+      {items.map(({ key, label, title }) => {
+        const ok = !!envelopes[key]
+        return (
+          <span
+            key={key}
+            title={ok ? title : `Non éligible (${label})`}
+            className={`rounded font-bold ${pad} ${
+              ok
+                ? 'bg-gain/15 text-gain'
+                : 'bg-navy-100 text-navy-300 line-through dark:bg-navy-800 dark:text-navy-600'
+            }`}
+          >
+            {label}
+          </span>
+        )
+      })}
+    </span>
+  )
+}
+
 export default function AssetSearch({ allAssets, selectedAssets, onChange, autoRebalance, onToggleRebalance }) {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
@@ -17,9 +48,9 @@ export default function AssetSearch({ allAssets, selectedAssets, onChange, autoR
       (a) =>
         !selectedIds.includes(a.id) &&
         (q === '' ||
-          a.name.toLowerCase().includes(q) ||
-          a.ticker.toLowerCase().includes(q) ||
-          a.description.toLowerCase().includes(q)),
+          [a.name, a.ticker, a.description, a.sector, a.region, a.type]
+            .filter(Boolean)
+            .some((field) => field.toLowerCase().includes(q))),
     )
   }, [query, allAssets, selectedIds])
 
@@ -89,15 +120,25 @@ export default function AssetSearch({ allAssets, selectedAssets, onChange, autoR
               <li key={a.id}>
                 <button
                   onClick={() => addAsset(a)}
-                  className="flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-navy-50 dark:hover:bg-navy-700"
+                  className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm transition hover:bg-navy-50 dark:hover:bg-navy-700"
                 >
-                  <span>
-                    <span className="font-semibold" style={{ color: a.color }}>
-                      {a.name}
+                  <span className="min-w-0">
+                    <span className="flex items-center gap-2">
+                      <span className="truncate font-semibold" style={{ color: a.color }}>
+                        {a.name}
+                      </span>
+                      <span className="shrink-0 text-xs text-navy-400">{a.ticker}</span>
                     </span>
-                    <span className="ml-2 text-xs text-navy-400">{a.ticker} · {a.type}</span>
+                    <span className="text-[11px] text-navy-400">
+                      {a.type}
+                      {a.sector ? ` · ${a.sector}` : ''}
+                      {a.region ? ` · ${a.region}` : ''}
+                    </span>
                   </span>
-                  <Plus size={15} className="text-navy-400" />
+                  <span className="flex shrink-0 items-center gap-2">
+                    <EnvelopeBadges envelopes={a.envelopes} />
+                    <Plus size={15} className="text-navy-400" />
+                  </span>
                 </button>
               </li>
             ))}
@@ -105,6 +146,15 @@ export default function AssetSearch({ allAssets, selectedAssets, onChange, autoR
         )}
       </div>
       {open && <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />}
+
+      {/* Légende des enveloppes éligibles */}
+      <p className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-navy-400">
+        Enveloppes compatibles :
+        <span className="rounded bg-gain/15 px-1.5 py-0.5 font-bold text-gain">PEA</span>
+        <span className="rounded bg-gain/15 px-1.5 py-0.5 font-bold text-gain">CTO</span>
+        <span className="rounded bg-gain/15 px-1.5 py-0.5 font-bold text-gain">AV</span>
+        — une pastille <span className="font-semibold text-navy-400">barrée</span> = non éligible.
+      </p>
 
       {/* Liste des actifs sélectionnés avec allocation */}
       <div className="mt-4 space-y-2">
@@ -116,19 +166,22 @@ export default function AssetSearch({ allAssets, selectedAssets, onChange, autoR
           if (!asset) return null
           return (
             <div key={s.id} className="rounded-lg border border-navy-100 p-3 dark:border-navy-800">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-full" style={{ background: asset.color }} />
-                  <span className="text-sm font-semibold">{asset.name}</span>
-                  <span className="text-xs text-navy-400">{asset.ticker}</span>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: asset.color }} />
+                  <span className="truncate text-sm font-semibold">{asset.name}</span>
+                  <span className="shrink-0 text-xs text-navy-400">{asset.ticker}</span>
                 </div>
-                <button
-                  onClick={() => removeAsset(s.id)}
-                  aria-label={`Retirer ${asset.name}`}
-                  className="text-navy-400 transition hover:text-loss"
-                >
-                  <X size={16} />
-                </button>
+                <div className="flex shrink-0 items-center gap-2">
+                  <EnvelopeBadges envelopes={asset.envelopes} />
+                  <button
+                    onClick={() => removeAsset(s.id)}
+                    aria-label={`Retirer ${asset.name}`}
+                    className="text-navy-400 transition hover:text-loss"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
               </div>
               {selectedAssets.length > 1 && (
                 <div className="mt-2 flex items-center gap-3">
