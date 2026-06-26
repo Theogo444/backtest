@@ -1,0 +1,65 @@
+// ============================================================================
+//  Footer.jsx — pied de page : disclaimer légal + liens
+// ============================================================================
+
+import AdSlot from './AdSlot'
+
+export default function Footer({ onNavigate, source }) {
+  return (
+    <footer className="mt-10 border-t border-navy-100 pt-6 dark:border-navy-800">
+      {/* AdSense slot: FOOTER_INTERSTITIAL */}
+      <AdSlot format="leaderboard" position="FOOTER_INTERSTITIAL" className="hidden md:flex" />
+
+      <div className="grid gap-6 px-1 py-6 text-sm text-navy-500 md:grid-cols-3">
+        <div>
+          <h3 className="mb-2 font-bold text-navy-700 dark:text-navy-200">Simulateur de Portefeuille FR</h3>
+          <p className="leading-relaxed">
+            Backtestez gratuitement vos stratégies d'investissement (DCA, Value Averaging, Lump Sum…) sur
+            PEA, CTO ou Assurance-vie. Outil pédagogique pour particuliers français.
+          </p>
+          <p className="mt-2 text-xs">
+            Données :{' '}
+            <span className="font-semibold">
+              {source === 'live' ? 'Yahoo Finance (temps réel)' : 'jeu de démonstration local'}
+            </span>
+          </p>
+        </div>
+
+        <div>
+          <h3 className="mb-2 font-bold text-navy-700 dark:text-navy-200">Navigation</h3>
+          <ul className="space-y-1">
+            {[
+              ['simulateur', 'Simulateur'],
+              ['comparateur', 'Comparateur d\'enveloppes'],
+              ['retraite', 'Objectif retraite'],
+              ['monte-carlo', 'Monte Carlo'],
+              ['glossaire', 'Glossaire'],
+            ].map(([id, label]) => (
+              <li key={id}>
+                <button onClick={() => onNavigate(id)} className="transition hover:text-navy-800 dark:hover:text-white">
+                  {label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h3 className="mb-2 font-bold text-navy-700 dark:text-navy-200">Avertissement</h3>
+          <p className="leading-relaxed">
+            Les performances passées ne préjugent pas des performances futures. Les données peuvent être
+            simulées à des fins de démonstration.
+          </p>
+        </div>
+      </div>
+
+      <div className="rounded-xl bg-navy-100/60 px-4 py-3 text-center text-xs font-medium text-navy-600 dark:bg-navy-900 dark:text-navy-400">
+        ⚠️ Ce site est à but éducatif uniquement et ne constitue pas un conseil en investissement.
+      </div>
+
+      <p className="py-4 text-center text-xs text-navy-400">
+        © {2026} Simulateur de Portefeuille FR — Tous droits réservés.
+      </p>
+    </footer>
+  )
+}

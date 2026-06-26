@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- Base ---------- */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-navy-50 text-navy-900 antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .dark body {
+    @apply bg-navy-950 text-navy-100;
+  }
+  /* Champs de formulaire cohérents en mode clair/sombre */
+  input[type='number'],
+  input[type='text'],
+  input[type='date'],
+  select {
+    @apply outline-none transition-colors;
+  }
+  /* Retire les flèches des inputs number pour un rendu plus propre */
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+/* ---------- Composants utilitaires ---------- */
+@layer components {
+  /* Carte standard */
+  .card {
+    @apply rounded-2xl bg-white p-5 shadow-sm ring-1 ring-navy-100 transition-colors;
+  }
+  .dark .card {
+    @apply bg-navy-900 ring-navy-800;
+  }
+
+  /* Champ de saisie */
+  .field {
+    @apply w-full rounded-lg border border-navy-200 bg-white px-3 py-2 text-sm text-navy-900 focus:border-navy-500 focus:ring-2 focus:ring-navy-500/30;
+  }
+  .dark .field {
+    @apply border-navy-700 bg-navy-800 text-navy-50 focus:border-navy-400;
+  }
+
+  /* Libellé de champ */
+  .label {
+    @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-navy-500;
+  }
+  .dark .label {
+    @apply text-navy-300;
+  }
+
+  /* Bouton principal */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-navy-800 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-navy-700 active:scale-[0.98] disabled:opacity-50;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-navy-300 bg-white px-4 py-2 text-sm font-semibold text-navy-700 transition hover:bg-navy-50;
+  }
+  .dark .btn-secondary {
+    @apply border-navy-600 bg-navy-800 text-navy-100 hover:bg-navy-700;
+  }
+
+  /* Emplacement publicitaire (AdSense) */
+  .ad-slot {
+    @apply flex items-center justify-center overflow-hidden rounded-lg border border-dashed border-navy-200 bg-navy-50/50 text-xs text-navy-400;
+  }
+  .dark .ad-slot {
+    @apply border-navy-700 bg-navy-900/40 text-navy-500;
+  }
+
+  /* Skeleton loader (chargement progressif) */
+  .skeleton {
+    @apply animate-pulse rounded-md bg-navy-100;
+  }
+  .dark .skeleton {
+    @apply bg-navy-800;
+  }
+}
+
+/* Barre de défilement discrète */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #9fb3c8;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334e68;
+}

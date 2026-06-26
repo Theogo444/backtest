@@ -1,0 +1,5 @@
+# robots.txt — accès permissif pour le référencement
+User-agent: *
+Allow: /
+
+Sitemap: https://simulateur-portefeuille.fr/sitemap.xml
