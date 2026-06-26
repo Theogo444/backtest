@@ -55,19 +55,32 @@ export default function AssetSearch({ allAssets, selectedAssets, onChange, autoR
   }, [query, allAssets, selectedIds])
 
   function addAsset(asset) {
-    // Réparti équitablement par défaut
-    const n = selectedAssets.length + 1
-    const equal = Math.round(100 / n)
-    const next = [
-      ...selectedAssets.map((s) => ({ ...s, allocation: equal })),
-      { id: asset.id, allocation: 100 - equal * (n - 1) },
-    ]
-    onChange(next)
+    // Le nouvel actif reçoit une part « équitable » ; les actifs existants
+    // conservent leurs proportions RELATIVES (mises à l'échelle pour laisser
+    // la place), de sorte que la forme du portefeuille n'est pas écrasée.
+    const n = selectedAssets.length
+    if (n === 0) {
+      onChange([{ id: asset.id, allocation: 100 }])
+    } else {
+      const share = Math.round(100 / (n + 1))
+      const remaining = 100 - share
+      const currentTotal = selectedAssets.reduce((sum, s) => sum + (Number(s.allocation) || 0), 0) || 1
+      let acc = 0
+      const scaled = selectedAssets.map((s) => {
+        const val = Math.round(((Number(s.allocation) || 0) / currentTotal) * remaining)
+        acc += val
+        return { ...s, allocation: val }
+      })
+      // Le nouvel actif absorbe l'arrondi pour un total exact de 100 %
+      onChange([...scaled, { id: asset.id, allocation: Math.max(0, 100 - acc) }])
+    }
     setQuery('')
     setOpen(false)
   }
 
   function removeAsset(id) {
+    // On retire l'actif SANS toucher aux pourcentages des autres
+    // (ex. retirer D de 40/40/10/10 → 40/40/10, normalisé à la simulation).
     const remaining = selectedAssets.filter((s) => s.id !== id)
     onChange(remaining)
   }
@@ -86,6 +99,23 @@ export default function AssetSearch({ allAssets, selectedAssets, onChange, autoR
         allocation: i === n - 1 ? 100 - equal * (n - 1) : equal,
       })),
     )
+  }
+
+  // Met à l'échelle les allocations actuelles pour que leur somme fasse 100 %,
+  // en conservant leurs proportions relatives.
+  function normalizeTo100() {
+    const n = selectedAssets.length
+    if (n === 0) return
+    const total = selectedAssets.reduce((sum, s) => sum + (Number(s.allocation) || 0), 0)
+    if (total <= 0) return balanceEqually()
+    let acc = 0
+    const scaled = selectedAssets.map((s, i) => {
+      if (i === n - 1) return { ...s, allocation: 100 - acc }
+      const val = Math.round(((Number(s.allocation) || 0) / total) * 100)
+      acc += val
+      return { ...s, allocation: val }
+    })
+    onChange(scaled)
   }
 
   const totalAlloc = selectedAssets.reduce((sum, s) => sum + (Number(s.allocation) || 0), 0)
@@ -214,10 +244,17 @@ export default function AssetSearch({ allAssets, selectedAssets, onChange, autoR
       {/* Total d'allocation + actions multi-actifs */}
       {selectedAssets.length > 1 && (
         <div className="mt-3 space-y-2">
-          <div className="flex items-center justify-between text-xs">
-            <button onClick={balanceEqually} className="font-semibold text-navy-600 hover:underline dark:text-navy-300">
-              Répartir équitablement
-            </button>
+          <div className="flex items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-3">
+              <button onClick={balanceEqually} className="font-semibold text-navy-600 hover:underline dark:text-navy-300">
+                Répartir équitablement
+              </button>
+              {totalAlloc !== 100 && (
+                <button onClick={normalizeTo100} className="font-semibold text-navy-600 hover:underline dark:text-navy-300">
+                  Normaliser à 100 %
+                </button>
+              )}
+            </div>
             <span className={totalAlloc === 100 ? 'text-gain' : 'text-loss font-semibold'}>
               Total : {totalAlloc}%{totalAlloc !== 100 ? ' (sera normalisé à 100 %)' : ''}
             </span>

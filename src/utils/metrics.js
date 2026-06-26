@@ -231,6 +231,108 @@ export function cumulativeInflation(startYear, endYear) {
 }
 
 // ----------------------------------------------------------------------------
+//  Profils d'investissement & valeurs de référence
+//
+//  À partir de la volatilité annualisée du portefeuille, on classe la
+//  simulation dans un profil (Prudent / Équilibré / Dynamique / Offensif) et
+//  on fournit des fourchettes de référence pour chaque métrique, afin que
+//  l'utilisateur dispose d'un repère adapté au risque qu'il prend.
+// ----------------------------------------------------------------------------
+const PROFILES = [
+  {
+    key: 'prudent', label: 'Prudent', maxVol: 0.06, color: '#0891b2',
+    volRange: '2 à 6 %', ddRange: '−2 à −10 %', ddTypicalMax: 0.10,
+    cagrRange: '+2 à +4 %', cagrLow: 0.02, cagrHigh: 0.04,
+    desc: 'Faible exposition aux actions (fonds euros, obligations, livrets). Capital peu volatil.',
+  },
+  {
+    key: 'equilibre', label: 'Équilibré', maxVol: 0.12, color: '#16a34a',
+    volRange: '6 à 12 %', ddRange: '−10 à −25 %', ddTypicalMax: 0.25,
+    cagrRange: '+4 à +6 %', cagrLow: 0.04, cagrHigh: 0.06,
+    desc: 'Mélange actions / actifs défensifs. Bon compromis rendement / risque.',
+  },
+  {
+    key: 'dynamique', label: 'Dynamique', maxVol: 0.20, color: '#d97706',
+    volRange: '12 à 20 %', ddRange: '−25 à −45 %', ddTypicalMax: 0.45,
+    cagrRange: '+6 à +9 %', cagrLow: 0.06, cagrHigh: 0.09,
+    desc: 'Portefeuille majoritairement actions diversifiées. Volatilité marquée.',
+  },
+  {
+    key: 'offensif', label: 'Offensif', maxVol: Infinity, color: '#dc2626',
+    volRange: '20 % et plus', ddRange: '−40 à −60 %', ddTypicalMax: 0.60,
+    cagrRange: '+8 à +12 %', cagrLow: 0.08, cagrHigh: 0.12,
+    desc: '100 % actions, secteurs ou titres concentrés. Fort potentiel mais creux profonds.',
+  },
+]
+
+export function riskProfile(volatility) {
+  const v = volatility ?? 0
+  return PROFILES.find((p) => v < p.maxVol) || PROFILES[PROFILES.length - 1]
+}
+
+// Évalue le ratio de Sharpe (interprétation universelle)
+function rateSharpe(s) {
+  if (s == null) return { label: '—', tone: 'neutral' }
+  if (s >= 1.5) return { label: 'Excellent', tone: 'gain' }
+  if (s >= 1) return { label: 'Bon', tone: 'gain' }
+  if (s >= 0.5) return { label: 'Correct', tone: 'neutral' }
+  if (s >= 0) return { label: 'Faible', tone: 'neutral' }
+  return { label: 'Négatif', tone: 'loss' }
+}
+
+// Évalue la volatilité (interprétation absolue)
+function rateVolatility(v) {
+  if (v == null) return { label: '—', tone: 'neutral' }
+  if (v < 0.06) return { label: 'Faible', tone: 'gain' }
+  if (v < 0.12) return { label: 'Modérée', tone: 'neutral' }
+  if (v < 0.20) return { label: 'Élevée', tone: 'neutral' }
+  return { label: 'Très élevée', tone: 'loss' }
+}
+
+// Évalue le max drawdown au regard du profil
+function rateDrawdown(dd, profile) {
+  if (dd == null) return { label: '—', tone: 'neutral' }
+  const ad = Math.abs(dd)
+  if (ad <= profile.ddTypicalMax * 0.6) return { label: 'Contenu', tone: 'gain' }
+  if (ad <= profile.ddTypicalMax) return { label: 'Habituel', tone: 'neutral' }
+  return { label: 'Sévère', tone: 'loss' }
+}
+
+// Évalue la performance annualisée au regard du profil
+function rateCagr(c, profile) {
+  if (c == null) return { label: '—', tone: 'neutral' }
+  if (c >= profile.cagrHigh) return { label: 'Au-dessus du repère', tone: 'gain' }
+  if (c >= profile.cagrLow) return { label: 'Dans la fourchette', tone: 'gain' }
+  if (c >= 0) return { label: 'Sous le repère', tone: 'neutral' }
+  return { label: 'Négative', tone: 'loss' }
+}
+
+// Construit, pour un jeu de métriques, le profil + les repères par indicateur.
+export function metricBenchmarks(metrics) {
+  if (!metrics) return null
+  const profile = riskProfile(metrics.volatility)
+  return {
+    profile,
+    sharpe: {
+      rating: rateSharpe(metrics.sharpe),
+      reference: 'Repère : négatif = mauvais · ~0,5 correct · 1 bon · 2 excellent.',
+    },
+    volatility: {
+      rating: rateVolatility(metrics.volatility),
+      reference: `Repère : < 6 % prudent · 6–12 % équilibré · 12–20 % dynamique · > 20 % offensif. Votre profil : ${profile.label} (${profile.volRange}).`,
+    },
+    maxDrawdown: {
+      rating: rateDrawdown(metrics.maxDrawdown, profile),
+      reference: `Repère profil ${profile.label} : creux habituel de ${profile.ddRange}. Pour mémoire, les grands krachs actions ont atteint −30 à −55 % (2008, 2020).`,
+    },
+    cagr: {
+      rating: rateCagr(metrics.cagr, profile),
+      reference: `Repère profil ${profile.label} : ${profile.cagrRange}/an attendus sur le long terme (actions Monde ≈ +7 %/an, Livret A ≈ +2 %/an).`,
+    },
+  }
+}
+
+// ----------------------------------------------------------------------------
 //  Calcule l'ensemble des métriques à partir d'un résultat de simulation.
 // ----------------------------------------------------------------------------
 export function computeMetrics({ valueSeries, contributions, blendedIndex, dates, riskFreeRate, years }) {
