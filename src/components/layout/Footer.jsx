@@ -2,9 +2,10 @@
 //  Footer.jsx — pied de page : disclaimer légal + liens
 // ============================================================================
 
+import { Link } from 'react-router-dom'
 import AdSlot from './AdSlot'
 
-export default function Footer({ onNavigate, source, updatedAt }) {
+export default function Footer({ source, updatedAt }) {
   const updatedLabel = updatedAt
     ? new Date(updatedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
     : null
@@ -39,16 +40,17 @@ export default function Footer({ onNavigate, source, updatedAt }) {
           <h3 className="mb-2 font-bold text-navy-700 dark:text-navy-200">Navigation</h3>
           <ul className="space-y-1">
             {[
-              ['simulateur', 'Simulateur'],
-              ['comparateur', 'Comparateur d\'enveloppes'],
-              ['retraite', 'Objectif retraite'],
-              ['monte-carlo', 'Monte Carlo'],
-              ['glossaire', 'Glossaire'],
-            ].map(([id, label]) => (
-              <li key={id}>
-                <button onClick={() => onNavigate(id)} className="transition hover:text-navy-800 dark:hover:text-white">
+              ['/', 'Accueil'],
+              ['/simulateur', 'Simulateur'],
+              ['/comparateur', 'Comparateur d\'enveloppes'],
+              ['/retraite', 'Objectif retraite'],
+              ['/monte-carlo', 'Monte Carlo'],
+              ['/glossaire', 'Glossaire'],
+            ].map(([to, label]) => (
+              <li key={to}>
+                <Link to={to} className="transition hover:text-navy-800 dark:hover:text-white">
                   {label}
-                </button>
+                </Link>
               </li>
             ))}
           </ul>
