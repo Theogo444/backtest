@@ -34,12 +34,25 @@ npm run preview  # prévisualise le build
 
 ## 📊 Données de marché
 
-L'application utilise un **jeu de données de démonstration** généré localement et de façon
-déterministe (`src/data/defaultAssets.js`) : séries mensuelles 2000–2026 pour le S&P 500, MSCI World,
-CAC 40, Nasdaq 100, Or et Livret A, avec krachs historiques reproduits (2000, 2008, 2020, 2022).
+L'application part d'un **historique de démonstration** généré localement et de façon
+déterministe (`src/data/defaultAssets.js`) : séries mensuelles 2000–2026 pour ~57 actifs (indices,
+ETF et actions de référence), avec krachs historiques reproduits (2000, 2008, 2020, 2022).
 
-Un appel à **Yahoo Finance** est prévu (`src/hooks/useMarketData.js`, `fetchYahooHistory`) mais
-désactivé par défaut (CORS navigateur) — à brancher via un proxy/backend pour des données temps réel.
+### Actualisation quotidienne (cours réels)
+
+Une **GitHub Action** (`.github/workflows/update-quotes.yml`) s'exécute chaque jour à **06:00 UTC** :
+
+1. `scripts/update-quotes.mjs` récupère les clôtures journalières réelles (Yahoo Finance, côté
+   serveur → pas de CORS) pour chaque actif et les accumule dans `public/data/quotes.json` ;
+2. le fichier est committé **uniquement s'il a changé**, ce qui déclenche un redéploiement Vercel.
+
+Au chargement, `useMarketData` lit `quotes.json` et **greffe** les cours réels récents sur la fin de
+l'historique synthétique, en continuité (mise à l'échelle par le premier cours collecté) et en
+conservant un calendrier mensuel homogène pour le moteur de simulation. En l'absence de fichier (ou
+de données), l'app retombe sur l'historique de démonstration. La source et la date d'actualisation
+sont indiquées dans le pied de page.
+
+> Déclenchement manuel possible depuis l'onglet **Actions** de GitHub (« Run workflow »).
 
 ## 💰 Monétisation
 
