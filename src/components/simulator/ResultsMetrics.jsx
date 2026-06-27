@@ -7,21 +7,29 @@ import Tooltip from '../ui/Tooltip'
 import { formatEUR, formatPct, metricBenchmarks } from '../../utils/metrics'
 
 const CHIP_TONE = {
-  gain: 'bg-gain/15 text-gain',
-  loss: 'bg-loss/15 text-loss',
+  gain: 'bg-gain/12 text-gain',
+  loss: 'bg-loss/12 text-loss',
   neutral: 'bg-navy-100 text-navy-500 dark:bg-navy-800 dark:text-navy-300',
 }
 
-// Pastille d'évaluation (Bon / Correct / Sévère…)
+// Pastille d'évaluation (Bon / Correct / Sévère…) — point coloré + libellé
 function RatingChip({ rating }) {
   if (!rating || rating.label === '—') return null
   return (
-    <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide ${CHIP_TONE[rating.tone] || CHIP_TONE.neutral}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold leading-none ${
+        CHIP_TONE[rating.tone] || CHIP_TONE.neutral
+      }`}
+    >
+      <span className="h-1 w-1 rounded-full bg-current opacity-80" />
       {rating.label}
     </span>
   )
 }
 
+// Carte de métrique à 3 zones de hauteur fixe : en-tête / valeur / méta.
+// Ces zones réservées garantissent que tous les chiffres reposent sur la même
+// ligne de base et que tous les bas de cartes s'alignent parfaitement.
 function MetricCard({ icon: Icon, label, value, sub, tooltip, tone = 'neutral', rating, reference }) {
   const toneClass =
     tone === 'gain' ? 'text-gain' : tone === 'loss' ? 'text-loss' : 'text-navy-800 dark:text-white'
@@ -34,19 +42,32 @@ function MetricCard({ icon: Icon, label, value, sub, tooltip, tone = 'neutral', 
     tooltip
   )
   return (
-    <div className="card flex flex-col items-center text-center">
-      <div className="mb-2 flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-navy-400">
-        {Icon && <Icon size={12} />}
-        <span>{label}</span>
-        {(tooltip || reference) && <Tooltip text={fullTooltip} />}
+    <div className="flex min-h-[7.5rem] flex-col rounded-2xl bg-white p-4 shadow-sm ring-1 ring-navy-100 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:ring-navy-200 dark:bg-navy-900 dark:ring-navy-800 dark:hover:ring-navy-700">
+      {/* En-tête : icône + libellé (hauteur réservée pour 1 ou 2 lignes) */}
+      <div className="flex min-h-[2rem] items-start justify-center gap-1.5 text-center">
+        {Icon && <Icon size={13} className="mt-px shrink-0 text-navy-400" />}
+        <span className="text-[10.5px] font-semibold uppercase leading-tight tracking-wide text-navy-400">
+          {label}
+        </span>
+        {(tooltip || reference) && (
+          <span className="mt-px shrink-0">
+            <Tooltip text={fullTooltip} />
+          </span>
+        )}
       </div>
-      <div className={`text-2xl font-extrabold tabular-nums leading-none ${toneClass}`}>{value}</div>
-      {rating && rating.label !== '—' && (
-        <div className="mt-1.5">
-          <RatingChip rating={rating} />
-        </div>
-      )}
-      {sub && <div className="mt-1 text-xs text-navy-400">{sub}</div>}
+
+      {/* Valeur : centrée verticalement dans l'espace disponible */}
+      <div className="flex flex-1 items-center justify-center py-1.5">
+        <span className={`text-2xl font-extrabold leading-none tracking-tight tabular-nums ${toneClass}`}>
+          {value}
+        </span>
+      </div>
+
+      {/* Méta : pastille d'évaluation et/ou légende (toujours en bas) */}
+      <div className="flex min-h-[1.25rem] flex-col items-center justify-end gap-1 text-center">
+        {rating && rating.label !== '—' && <RatingChip rating={rating} />}
+        {sub && <span className="text-[11px] leading-tight text-navy-400">{sub}</span>}
+      </div>
     </div>
   )
 }
@@ -78,7 +99,7 @@ export default function ResultsMetrics({ metrics, adjustInflation }) {
       <span className="text-xs text-navy-400">{profile.desc}</span>
     </div>
 
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 lg:gap-3">
       <MetricCard
         icon={Wallet}
         label="Valeur finale"
@@ -90,6 +111,7 @@ export default function ResultsMetrics({ metrics, adjustInflation }) {
         icon={PiggyBank}
         label="Total investi"
         value={formatEUR(metrics.totalInvested)}
+        sub="apports cumulés"
         tooltip="Somme totale de vos apports sur la période."
       />
       <MetricCard
@@ -140,6 +162,7 @@ export default function ResultsMetrics({ metrics, adjustInflation }) {
         icon={ArrowDownRight}
         label="Max Drawdown"
         value={formatPct(metrics.maxDrawdown)}
+        sub="pire creux subi"
         tone="loss"
         tooltip="Plus forte baisse subie depuis un sommet. Mesure la douleur maximale."
         rating={bench.maxDrawdown.rating}
@@ -149,6 +172,7 @@ export default function ResultsMetrics({ metrics, adjustInflation }) {
         icon={Activity}
         label="Volatilité annualisée"
         value={formatPct(metrics.volatility)}
+        sub="amplitude annuelle"
         tooltip="Amplitude des variations annuelles. Plus c'est élevé, plus c'est risqué."
         rating={bench.volatility.rating}
         reference={bench.volatility.reference}
