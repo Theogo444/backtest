@@ -77,9 +77,11 @@ export default function MonteCarloSimulator({ config, marketData }) {
         <h1 className="flex items-center gap-2 text-2xl font-extrabold text-navy-800 dark:text-white md:text-3xl">
           <Dices size={26} /> Monte Carlo
         </h1>
-        <p className="mt-1 text-sm text-navy-500 dark:text-navy-400">
-          Des milliers de scénarios de marché aléatoires basés sur l'historique de votre allocation
-          {result && <> ({result.assetObjs.map((a) => a.name).join(', ')})</>}.
+        <p className="mt-1 text-sm leading-relaxed text-navy-500 dark:text-navy-400">
+          La méthode de Monte Carlo rejoue des milliers d'avenirs possibles : chaque mois, un
+          rendement est tiré au hasard autour du <strong>rendement moyen</strong> et de la volatilité
+          de votre portefeuille. On obtient ainsi un éventail de résultats probables, plutôt qu'une
+          seule trajectoire « moyenne » trompeuse.
         </p>
       </header>
 
@@ -106,10 +108,29 @@ export default function MonteCarloSimulator({ config, marketData }) {
           <Field label="Versement mensuel" value={settings.monthlyContribution} onChange={(v) => set('monthlyContribution', Number(v))} step={50} suffix="€" />
           <Field label="Objectif à atteindre" value={settings.targetValue} onChange={(v) => set('targetValue', Number(v))} step={5000} suffix="€" />
 
-          <div className="rounded-lg bg-navy-50 px-3 py-2 text-xs text-navy-500 dark:bg-navy-800">
-            Hypothèses (historique) : rendement{' '}
-            <strong className="text-navy-700 dark:text-navy-200">{formatPct(annualReturn, true)}</strong>/an, volatilité{' '}
-            <strong className="text-navy-700 dark:text-navy-200">{formatPct(annualVol)}</strong>.
+          <div className="rounded-lg bg-navy-50 px-3 py-2.5 text-xs text-navy-600 dark:bg-navy-800 dark:text-navy-300">
+            <div className="mb-1.5 font-semibold uppercase tracking-wide text-navy-700 dark:text-navy-200">
+              Hypothèses de marché
+            </div>
+            {result ? (
+              <p className="mb-2 leading-relaxed text-navy-500 dark:text-navy-400">
+                Rendement moyen et volatilité repris de <strong>votre portefeuille du simulateur</strong>{' '}
+                ({result.assetObjs.map((a) => a.name).join(', ')}), mesurés sur l'historique.
+              </p>
+            ) : (
+              <p className="mb-2 leading-relaxed text-navy-500 dark:text-navy-400">
+                Aucune allocation configurée : hypothèses par défaut. Choisissez vos actifs dans
+                l'onglet « Simulateur » pour caler la projection sur <strong>votre portefeuille</strong>.
+              </p>
+            )}
+            <div className="flex items-center justify-between border-t border-navy-200/70 pt-1.5 dark:border-navy-700">
+              <span>Rendement moyen</span>
+              <strong className="tabular-nums text-navy-700 dark:text-navy-200">{formatPct(annualReturn, true)}/an</strong>
+            </div>
+            <div className="mt-1 flex items-center justify-between">
+              <span>Volatilité</span>
+              <strong className="tabular-nums text-navy-700 dark:text-navy-200">{formatPct(annualVol)}</strong>
+            </div>
           </div>
 
           <button onClick={() => setRunSeed((s) => s + 1)} className="btn-primary w-full">
