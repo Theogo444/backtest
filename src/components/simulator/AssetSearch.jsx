@@ -85,8 +85,40 @@ export default function AssetSearch({ allAssets, selectedAssets, onChange, autoR
     onChange(remaining)
   }
 
-  function setAllocation(id, value) {
-    onChange(selectedAssets.map((s) => (s.id === id ? { ...s, allocation: Number(value) } : s)))
+  function setAllocation(id, rawValue) {
+    const newVal = Math.min(100, Math.max(0, Number(rawValue)))
+    const others = selectedAssets.filter((s) => s.id !== id)
+    const remaining = 100 - newVal
+    const othersTotal = others.reduce((sum, s) => sum + (Number(s.allocation) || 0), 0)
+
+    let scaled
+    if (others.length === 0) {
+      onChange(selectedAssets.map((s) => (s.id === id ? { ...s, allocation: newVal } : s)))
+      return
+    }
+    if (othersTotal === 0 || remaining <= 0) {
+      const share = remaining > 0 ? Math.round(remaining / others.length) : 0
+      let used = 0
+      scaled = others.map((s, i) => {
+        if (i === others.length - 1) return { ...s, allocation: Math.max(0, remaining - used) }
+        used += share
+        return { ...s, allocation: Math.max(0, share) }
+      })
+    } else {
+      let used = 0
+      scaled = others.map((s, i) => {
+        if (i === others.length - 1) return { ...s, allocation: Math.max(0, remaining - used) }
+        const v = Math.round(((Number(s.allocation) || 0) / othersTotal) * remaining)
+        used += v
+        return { ...s, allocation: v }
+      })
+    }
+    onChange(
+      selectedAssets.map((s) => {
+        if (s.id === id) return { ...s, allocation: newVal }
+        return scaled.find((o) => o.id === s.id) || s
+      }),
+    )
   }
 
   function balanceEqually() {

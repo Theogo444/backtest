@@ -12,11 +12,11 @@ const CHIP_TONE = {
   neutral: 'bg-navy-100 text-navy-500 dark:bg-navy-800 dark:text-navy-300',
 }
 
-// Petite pastille d'évaluation (Bon / Correct / Sévère…)
+// Pastille d'évaluation (Bon / Correct / Sévère…)
 function RatingChip({ rating }) {
   if (!rating || rating.label === '—') return null
   return (
-    <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${CHIP_TONE[rating.tone] || CHIP_TONE.neutral}`}>
+    <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide ${CHIP_TONE[rating.tone] || CHIP_TONE.neutral}`}>
       {rating.label}
     </span>
   )
@@ -25,7 +25,6 @@ function RatingChip({ rating }) {
 function MetricCard({ icon: Icon, label, value, sub, tooltip, tone = 'neutral', rating, reference }) {
   const toneClass =
     tone === 'gain' ? 'text-gain' : tone === 'loss' ? 'text-loss' : 'text-navy-800 dark:text-white'
-  // La référence est ajoutée à l'infobulle pour servir de repère pédagogique
   const fullTooltip = reference ? (
     <>
       {tooltip}
@@ -35,17 +34,19 @@ function MetricCard({ icon: Icon, label, value, sub, tooltip, tone = 'neutral', 
     tooltip
   )
   return (
-    <div className="card">
-      <div className="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-navy-400">
-        {Icon && <Icon size={13} />}
+    <div className="card flex flex-col items-center text-center">
+      <div className="mb-2 flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-navy-400">
+        {Icon && <Icon size={12} />}
         <span>{label}</span>
         {(tooltip || reference) && <Tooltip text={fullTooltip} />}
       </div>
-      <div className="flex items-center gap-2">
-        <div className={`text-xl font-extrabold tabular-nums ${toneClass}`}>{value}</div>
-        {rating && <RatingChip rating={rating} />}
-      </div>
-      {sub && <div className="mt-0.5 text-xs text-navy-400">{sub}</div>}
+      <div className={`text-2xl font-extrabold tabular-nums leading-none ${toneClass}`}>{value}</div>
+      {rating && rating.label !== '—' && (
+        <div className="mt-1.5">
+          <RatingChip rating={rating} />
+        </div>
+      )}
+      {sub && <div className="mt-1 text-xs text-navy-400">{sub}</div>}
     </div>
   )
 }

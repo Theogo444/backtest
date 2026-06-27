@@ -36,6 +36,7 @@ export default function Simulator({ config, updateConfig, marketData }) {
       <div className="grid gap-4 lg:grid-cols-3">
         {/* ---------- Colonne de configuration ---------- */}
         <div className="space-y-4 lg:col-span-1">
+          <StrategySelector strategy={config.strategy} onChange={(s) => updateConfig({ strategy: s })} />
           <AssetSearch
             allAssets={assets}
             selectedAssets={config.selectedAssets}
@@ -43,7 +44,6 @@ export default function Simulator({ config, updateConfig, marketData }) {
             autoRebalance={config.autoRebalance}
             onToggleRebalance={(v) => updateConfig({ autoRebalance: v })}
           />
-          <StrategySelector strategy={config.strategy} onChange={(s) => updateConfig({ strategy: s })} />
           <ParametersPanel config={config} updateConfig={updateConfig} allAssets={assets} />
         </div>
 
