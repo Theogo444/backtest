@@ -97,6 +97,59 @@ export function mergeLiveQuotes(baseAssets, payload) {
 }
 
 // ----------------------------------------------------------------------------
+//  Remplace l'historique SYNTHÉTIQUE par l'historique MENSUEL RÉEL (history.json,
+//  cf. scripts/fetch-history.mjs) quand il est disponible, en respectant le
+//  calendrier partagé du moteur :
+//   • on conserve EXACTEMENT les mêmes dates (mêmes index) que la série de base ;
+//   • pour chaque mois, on prend la clôture réelle si elle existe ;
+//   • pour les mois ANTÉRIEURS au premier mois réel d'un actif (ex. ETF récent),
+//     on garde la série synthétique MISE À L'ÉCHELLE pour se raccorder sans saut
+//     (continuité au point de jonction) ;
+//   • pour les mois postérieurs au dernier mois réel (rare), on reporte la
+//     dernière valeur réelle.
+//  Les actifs sans historique réel restent synthétiques. Retourne { assets, hasReal }.
+// ----------------------------------------------------------------------------
+export function mergeRealHistory(baseAssets, payload) {
+  const history = payload?.history || {}
+  if (!baseAssets.length) return { assets: baseAssets, hasReal: false }
+  let hasReal = false
+
+  const assets = baseAssets.map((a) => {
+    const real = history[a.id]
+    if (!Array.isArray(real) || real.length < 12) return a
+    hasReal = true
+
+    // Index { 'YYYY-MM' → close réel } et bornes de disponibilité.
+    const byMonth = new Map(real.map((p) => [monthKey(p.date), p.close]))
+    const firstRealMonth = monthKey(real[0].date)
+    const lastRealMonth = monthKey(real[real.length - 1].date)
+
+    // Facteur de raccord pour la partie pré-historique : aligne le synthétique
+    // sur le premier cours réel au mois de jonction.
+    const synthAtFirst = a.series.find((p) => monthKey(p.date) === firstRealMonth)?.close
+    const realFirst = byMonth.get(firstRealMonth)
+    const f = synthAtFirst && synthAtFirst > 0 ? realFirst / synthAtFirst : 1
+
+    let lastReal = realFirst
+    const series = a.series.map((p) => {
+      const mk = monthKey(p.date)
+      if (byMonth.has(mk)) {
+        lastReal = byMonth.get(mk)
+        return { date: p.date, close: lastReal }
+      }
+      if (mk < firstRealMonth) return { date: p.date, close: round2(p.close * f) } // pré-historique scalé
+      if (mk > lastRealMonth) return { date: p.date, close: lastReal } // report (rare)
+      // Mois manquant à l'intérieur de la plage réelle : report de la dernière valeur réelle.
+      return { date: p.date, close: lastReal }
+    })
+
+    return { ...a, series }
+  })
+
+  return { assets, hasReal }
+}
+
+// ----------------------------------------------------------------------------
 //  Appel REST direct à Yahoo Finance (conservé pour usage manuel / debug ;
 //  bloqué par le CORS côté navigateur, d'où la couche quotes.json côté serveur).
 // ----------------------------------------------------------------------------
@@ -137,15 +190,48 @@ export function useMarketData() {
     async function load() {
       try {
         const base = import.meta.env.BASE_URL || '/'
-        const res = await fetch(`${base}data/quotes.json`, { cache: 'no-store' })
-        if (res.ok) {
-          const payload = await res.json()
-          const { assets: merged, hasLive } = mergeLiveQuotes(DEFAULT_ASSETS, payload)
-          if (!cancelled && hasLive) {
-            setAssets(merged)
-            setSource('live')
-            setUpdatedAt(payload.updated || null)
+        let working = DEFAULT_ASSETS
+        let gotReal = false
+        let realUpdated = null
+        let liveUpdated = null
+        let gotLive = false
+
+        // 1) Historique MENSUEL RÉEL long terme (history.json) → remplace le synthétique.
+        try {
+          const hres = await fetch(`${base}data/history.json`, { cache: 'no-store' })
+          if (hres.ok) {
+            const hpayload = await hres.json()
+            const { assets: withReal, hasReal } = mergeRealHistory(working, hpayload)
+            if (hasReal) {
+              working = withReal
+              gotReal = true
+              realUpdated = hpayload.updated || null
+            }
           }
+        } catch {
+          /* pas d'historique réel : on garde le synthétique */
+        }
+
+        // 2) Greffe des cours QUOTIDIENS récents (quotes.json) → fraîcheur du dernier mois.
+        try {
+          const qres = await fetch(`${base}data/quotes.json`, { cache: 'no-store' })
+          if (qres.ok) {
+            const qpayload = await qres.json()
+            const { assets: merged, hasLive } = mergeLiveQuotes(working, qpayload)
+            if (hasLive) {
+              working = merged
+              gotLive = true
+              liveUpdated = qpayload.updated || null
+            }
+          }
+        } catch {
+          /* pas de cours récents : tant pis */
+        }
+
+        if (!cancelled && (gotReal || gotLive)) {
+          setAssets(working)
+          setSource(gotReal ? 'real' : 'live')
+          setUpdatedAt(liveUpdated || realUpdated)
         }
       } catch {
         /* repli silencieux sur les données de démonstration */

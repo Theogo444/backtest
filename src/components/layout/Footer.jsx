@@ -23,11 +23,13 @@ export default function Footer({ onNavigate, source, updatedAt }) {
           <p className="mt-2 text-xs">
             Données :{' '}
             <span className="font-semibold">
-              {source === 'live'
-                ? 'historique de démonstration + cours réels (Marketstack)'
-                : 'jeu de démonstration local'}
+              {source === 'real'
+                ? 'historique réel mensuel (Yahoo Finance) + cours récents (Marketstack)'
+                : source === 'live'
+                  ? 'historique de démonstration + cours réels (Marketstack)'
+                  : 'jeu de démonstration local'}
             </span>
-            {source === 'live' && updatedLabel && (
+            {(source === 'real' || source === 'live') && updatedLabel && (
               <span className="block text-navy-400">Cours actualisés le {updatedLabel}.</span>
             )}
           </p>
