@@ -7,7 +7,10 @@
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
-        <string>/Users/theoeg/Desktop/Claude/backtest/scripts/daily-refresh.sh</string>
+        <!-- IMPORTANT : le script doit être HORS d'un dossier protégé par TCC
+             (~/Desktop, ~/Documents, ~/Downloads) sinon launchd renvoie
+             « Operation not permitted ». On le copie dans ~/Library/Application Support. -->
+        <string>/Users/theoeg/Library/Application Support/backtest/daily-refresh.sh</string>
     </array>
     <key>StartCalendarInterval</key>
     <dict>

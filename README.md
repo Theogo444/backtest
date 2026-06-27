@@ -68,11 +68,25 @@ datacenter de GitHub Actions.
 - `scripts/daily-refresh.sh` : lance le pull yfinance puis **committe/pousse** `history.json` s'il a
   changé (déclenche un redéploiement Vercel). N'agit que sur ce fichier.
 - `com.backtest.daily-refresh.plist` : agent launchd qui exécute le script **chaque jour à 08:30**
-  (rejoué au réveil si le Mac était éteint). Installation :
+  (rejoué au réveil si le Mac était éteint).
+
+> ⚠️ **macOS TCC** : launchd refuse d'**exécuter** un script situé dans un dossier protégé
+> (`~/Desktop`, `~/Documents`, `~/Downloads`) → erreur « Operation not permitted ». Le script est
+> donc **copié hors du Bureau**, dans `~/Library/Application Support/backtest/` (il `cd` ensuite dans
+> le dépôt du Bureau, ce qui, lui, est autorisé). Installation :
 
 ```bash
-cp com.backtest.daily-refresh.plist ~/Library/LaunchAgents/   # adapter les chemins absolus
+# 1) copier le script hors d'un dossier protégé par TCC
+mkdir -p ~/Library/Application\ Support/backtest
+cp scripts/daily-refresh.sh ~/Library/Application\ Support/backtest/
+chmod +x ~/Library/Application\ Support/backtest/daily-refresh.sh
+
+# 2) installer l'agent launchd (le plist pointe déjà vers ce chemin)
+cp scripts/com.backtest.daily-refresh.plist ~/Library/LaunchAgents/   # adapter les chemins absolus
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.backtest.daily-refresh.plist
+
+# 3) tester immédiatement (sans attendre 08:30)
+launchctl kickstart -k gui/$(id -u)/com.backtest.daily-refresh
 # logs : ~/Library/Logs/backtest-refresh.log
 ```
 
