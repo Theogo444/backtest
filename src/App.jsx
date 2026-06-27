@@ -122,7 +122,7 @@ export default function App() {
             {renderView()}
           </div>
 
-          <Footer onNavigate={navigate} source={marketData.source} />
+          <Footer onNavigate={navigate} source={marketData.source} updatedAt={marketData.updatedAt} />
         </main>
       </div>
 

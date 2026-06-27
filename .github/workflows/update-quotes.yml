@@ -1,0 +1,54 @@
+name: Actualisation quotidienne des cours
+
+# Récupère chaque jour les clôtures réelles de la veille (Yahoo Finance),
+# met à jour public/data/quotes.json et committe. Vercel redéploie ensuite
+# automatiquement le site avec les données fraîches.
+
+on:
+  schedule:
+    # 06:00 UTC (~07:00 Paris l'hiver, ~08:00 l'été) — après la clôture US.
+    - cron: '0 6 * * *'
+  workflow_dispatch: {} # permet aussi un déclenchement manuel depuis l'onglet Actions
+
+permissions:
+  contents: write
+
+# Évite deux exécutions concurrentes (cron + déclenchement manuel)
+concurrency:
+  group: update-quotes
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Récupère les cours et met à jour quotes.json
+        run: |
+          npx esbuild scripts/update-quotes.mjs --bundle --platform=node \
+            --format=esm --outfile=scripts/.update-quotes.bundle.mjs
+          node scripts/.update-quotes.bundle.mjs
+          rm -f scripts/.update-quotes.bundle.mjs
+
+      - name: Commit & push si modifié
+        run: |
+          if [[ -n "$(git status --porcelain public/data/quotes.json)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add public/data/quotes.json
+            git commit -m "chore: actualisation quotidienne des cours ($(date -u +%Y-%m-%d))"
+            git push
+          else
+            echo "Aucun changement — pas de commit."
+          fi

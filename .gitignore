@@ -7,3 +7,4 @@ dist-ssr
 .env.*
 .vercel
 npm-debug.log*
+scripts/.update-quotes.bundle.mjs

@@ -4,7 +4,10 @@
 
 import AdSlot from './AdSlot'
 
-export default function Footer({ onNavigate, source }) {
+export default function Footer({ onNavigate, source, updatedAt }) {
+  const updatedLabel = updatedAt
+    ? new Date(updatedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
+    : null
   return (
     <footer className="mt-10 border-t border-navy-100 pt-6 dark:border-navy-800">
       {/* AdSense slot: FOOTER_INTERSTITIAL */}
@@ -20,8 +23,13 @@ export default function Footer({ onNavigate, source }) {
           <p className="mt-2 text-xs">
             Données :{' '}
             <span className="font-semibold">
-              {source === 'live' ? 'Yahoo Finance (temps réel)' : 'jeu de démonstration local'}
+              {source === 'live'
+                ? 'historique de démonstration + cours réels (Yahoo Finance)'
+                : 'jeu de démonstration local'}
             </span>
+            {source === 'live' && updatedLabel && (
+              <span className="block text-navy-400">Cours actualisés le {updatedLabel}.</span>
+            )}
           </p>
         </div>
 
