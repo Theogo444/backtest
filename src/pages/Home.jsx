@@ -7,10 +7,11 @@ import { Head } from 'vite-react-ssg'
 import { Link } from 'react-router-dom'
 import {
   LineChart, Scale, Landmark, Dices, ArrowRight, ShieldCheck,
-  PiggyBank, Wallet, Star, TrendingUp,
+  PiggyBank, Wallet, Star, TrendingUp, Clock,
 } from 'lucide-react'
 import AdSlot from '../components/layout/AdSlot'
 import { BROKERS } from '../data/affiliates'
+import { GUIDES } from '../data/guides'
 
 const ENVELOPES = [
   {
@@ -187,6 +188,53 @@ export default function Home() {
           Certains liens sont des partenariats : ouvrir un compte via ces liens peut nous rémunérer,
           sans surcoût pour vous. Cela n'influence pas notre sélection.
         </p>
+      </section>
+
+      {/* --------------------------- Guides --------------------------- */}
+      <section className="mt-10">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-extrabold text-navy-800 dark:text-white md:text-2xl">
+              Nos guides pour bien démarrer
+            </h2>
+            <p className="mt-1 text-sm text-navy-500">
+              Des conseils clairs pour choisir votre enveloppe et votre stratégie.
+            </p>
+          </div>
+          <Link
+            to="/guides"
+            className="hidden shrink-0 items-center gap-1 text-sm font-semibold text-navy-700 hover:gap-2 dark:text-navy-200 sm:inline-flex"
+          >
+            Tous les guides <ArrowRight size={14} />
+          </Link>
+        </div>
+        <div className="mt-5 grid gap-4 md:grid-cols-3">
+          {GUIDES.slice(0, 3).map((g) => (
+            <Link key={g.slug} to={`/guides/${g.slug}`} className="card group flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-navy-100 px-2.5 py-0.5 text-[11px] font-bold text-navy-700 dark:bg-navy-800 dark:text-navy-200">
+                  {g.category}
+                </span>
+                <span className="inline-flex items-center gap-1 text-[11px] text-navy-400">
+                  <Clock size={12} /> {g.readingTime} min
+                </span>
+              </div>
+              <h3 className="mt-3 text-base font-bold text-navy-800 group-hover:text-navy-600 dark:text-white">
+                {g.title}
+              </h3>
+              <p className="mt-2 flex-1 text-sm text-navy-600 dark:text-navy-300">{g.excerpt}</p>
+              <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-navy-700 group-hover:gap-2 dark:text-navy-200">
+                Lire <ArrowRight size={14} />
+              </span>
+            </Link>
+          ))}
+        </div>
+        <Link
+          to="/guides"
+          className="btn-secondary mt-5 w-full sm:hidden"
+        >
+          Tous les guides <ArrowRight size={14} />
+        </Link>
       </section>
 
       {/* --------------------------- Contenu SEO --------------------------- */}

@@ -4,7 +4,7 @@
 // ============================================================================
 
 import { NavLink, Link } from 'react-router-dom'
-import { Home, LineChart, Scale, Landmark, Dices, BookOpen, Moon, Sun, TrendingUp } from 'lucide-react'
+import { Home, LineChart, Scale, Landmark, Dices, Newspaper, BookOpen, Moon, Sun, TrendingUp } from 'lucide-react'
 
 export const NAV_ITEMS = [
   { to: '/', label: 'Accueil', icon: Home, end: true },
@@ -12,6 +12,7 @@ export const NAV_ITEMS = [
   { to: '/comparateur', label: 'Enveloppes', icon: Scale },
   { to: '/retraite', label: 'Retraite', icon: Landmark },
   { to: '/monte-carlo', label: 'Monte Carlo', icon: Dices },
+  { to: '/guides', label: 'Guides', icon: Newspaper },
   { to: '/glossaire', label: 'Glossaire', icon: BookOpen },
 ]
 

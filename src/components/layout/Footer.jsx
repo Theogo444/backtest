@@ -45,6 +45,7 @@ export default function Footer({ source, updatedAt }) {
               ['/comparateur', 'Comparateur d\'enveloppes'],
               ['/retraite', 'Objectif retraite'],
               ['/monte-carlo', 'Monte Carlo'],
+              ['/guides', 'Guides'],
               ['/glossaire', 'Glossaire'],
             ].map(([to, label]) => (
               <li key={to}>

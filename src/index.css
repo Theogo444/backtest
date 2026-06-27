@@ -81,6 +81,48 @@
   .dark .skeleton {
     @apply bg-navy-800;
   }
+
+  /* Corps des articles (Markdown rendu) — typographie lisible */
+  .article-body {
+    @apply text-[15px] leading-relaxed text-navy-700 dark:text-navy-200;
+  }
+  .article-body h2 {
+    @apply mt-8 mb-3 text-xl font-extrabold text-navy-800 dark:text-white md:text-2xl;
+  }
+  .article-body h3 {
+    @apply mt-6 mb-2 text-lg font-bold text-navy-800 dark:text-white;
+  }
+  .article-body p {
+    @apply my-4;
+  }
+  .article-body ul,
+  .article-body ol {
+    @apply my-4 space-y-1.5 pl-5;
+  }
+  .article-body ul {
+    @apply list-disc;
+  }
+  .article-body ol {
+    @apply list-decimal;
+  }
+  .article-body li {
+    @apply pl-1;
+  }
+  .article-body a {
+    @apply font-semibold text-navy-700 underline decoration-navy-300 underline-offset-2 hover:text-navy-900 dark:text-navy-100 dark:hover:text-white;
+  }
+  .article-body strong {
+    @apply font-bold text-navy-800 dark:text-white;
+  }
+  .article-body table {
+    @apply my-5 w-full border-collapse overflow-hidden rounded-lg text-sm;
+  }
+  .article-body th {
+    @apply border border-navy-200 bg-navy-50 px-3 py-2 text-left font-bold text-navy-800 dark:border-navy-700 dark:bg-navy-800 dark:text-white;
+  }
+  .article-body td {
+    @apply border border-navy-200 px-3 py-2 dark:border-navy-700;
+  }
 }
 
 /* Barre de défilement discrète */
