@@ -65,7 +65,13 @@ const YAHOO_SUFFIX_TO_MIC = {
 }
 const SYMBOL_OVERRIDES = {
   sp500: 'SPY', nasdaq100: 'QQQ', cac40: 'EWQ', eurostoxx50: 'FEZ',
-  topix: 'EWJ', gold: 'GLD', berkshire: 'BRK.B', 'livret-a': null,
+  topix: 'EWJ', gold: 'GLD', 'livret-a': null,
+  // Symboles non couverts via leur place native sur le plan gratuit : on
+  // utilise l'ADR / le ticker US équivalent (la greffe ne regarde que les
+  // mouvements relatifs, mise à l'échelle par ancrage → devise sans incidence).
+  inditex: 'IDEXY', // Madrid (ITX.XMAD) absent → ADR US
+  toyota: 'TM', // Tokyo (7203.XTKS) absent → ADR NYSE
+  berkshire: 'BRK-B', // BRK.B/BRKB absents → variante tiret
 }
 
 function yahooToMarketstack(yahoo) {
@@ -137,8 +143,9 @@ async function fetchMarketstack() {
   const symbols = Object.values(symbolMap)
   console.log(`[Marketstack] ${symbols.length} symboles…`)
 
-  const to = new Date()
-  const from = new Date(Date.now() - 12 * 86400_000)
+  // Endpoint /eod/latest : dernière clôture connue par symbole. Couvre plus de
+  // places que /eod sur plage de dates (gratuit), et le job quotidien accumule
+  // un point par jour → la série se construit au fil du temps.
   const updatesById = {}
   const missing = new Set(symbolToId.keys())
 
@@ -147,12 +154,9 @@ async function fetchMarketstack() {
     const params = new URLSearchParams({
       access_key: API_KEY,
       symbols: batch.join(','),
-      date_from: ymd(from),
-      date_to: ymd(to),
       limit: '1000',
-      sort: 'ASC',
     })
-    const res = await fetch(`https://api.marketstack.com/v1/eod?${params}`)
+    const res = await fetch(`https://api.marketstack.com/v1/eod/latest?${params}`)
     const json = await res.json().catch(() => null)
     if (!res.ok || !json || json.error) {
       throw new Error(json?.error?.message || json?.error?.code || `HTTP ${res.status}`)
