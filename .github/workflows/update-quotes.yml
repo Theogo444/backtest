@@ -14,13 +14,6 @@ on:
     # la veille, le temps que Marketstack consolide les EOD.
     - cron: '30 6 * * *'
   workflow_dispatch: {} # permet aussi un déclenchement manuel depuis l'onglet Actions
-  push:
-    # Re-teste automatiquement dès qu'on modifie l'updater (pas sur les commits
-    # quotidiens de quotes.json → pas de boucle).
-    branches: [master]
-    paths:
-      - 'scripts/update-quotes.mjs'
-      - '.github/workflows/update-quotes.yml'
 
 permissions:
   contents: write

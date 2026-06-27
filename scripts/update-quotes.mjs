@@ -149,8 +149,10 @@ async function fetchMarketstack() {
   const updatesById = {}
   const missing = new Set(symbolToId.keys())
 
-  for (let i = 0; i < symbols.length; i += 50) {
-    const batch = symbols.slice(i, i + 50)
+  // Lot de 100 : /eod/latest renvoie 1 ligne/symbole (≤100 lignes/page), donc
+  // les 56 actifs tiennent en UN seul appel → 1 requête/jour (~30/mois ≪ 100).
+  for (let i = 0; i < symbols.length; i += 100) {
+    const batch = symbols.slice(i, i + 100)
     const params = new URLSearchParams({
       access_key: API_KEY,
       symbols: batch.join(','),
