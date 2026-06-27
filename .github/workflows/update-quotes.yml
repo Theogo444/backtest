@@ -1,19 +1,17 @@
-name: Actualisation quotidienne des cours
+name: Actualisation des cours (Marketstack — manuel)
 
-# Récupère chaque jour les clôtures réelles de la veille (Marketstack),
-# met à jour public/data/quotes.json et committe. Vercel redéploie ensuite
-# automatiquement le site avec les données fraîches.
+# ⚠️ PLANIFICATION DÉSACTIVÉE.
+# Le plan gratuit Marketstack facture PAR SYMBOLE (100 requêtes/mois) : mettre à
+# jour 56 actifs/jour = ~1680/mois, impossible en gratuit. La fraîcheur
+# quotidienne est donc assurée par un cron LOCAL sur le Mac (launchd +
+# scripts/daily-refresh.sh → yfinance), qui n'est pas bloqué par Yahoo
+# contrairement aux IP datacenter de GitHub Actions.
 #
-# Pré-requis : un secret de dépôt MARKETSTACK_API_KEY (clé gratuite
-# https://marketstack.com/signup). Sans lui, le job échoue volontairement
-# (rouge) plutôt que de produire un fichier vide en silence.
+# Ce workflow reste disponible en déclenchement MANUEL uniquement (utile avec un
+# plan Marketstack payant). Il requiert le secret MARKETSTACK_API_KEY.
 
 on:
-  schedule:
-    # 06:30 UTC (~07:30 Paris l'hiver, ~08:30 l'été) — après la clôture US de
-    # la veille, le temps que Marketstack consolide les EOD.
-    - cron: '30 6 * * *'
-  workflow_dispatch: {} # permet aussi un déclenchement manuel depuis l'onglet Actions
+  workflow_dispatch: {} # déclenchement manuel seulement (plus de cron)
 
 permissions:
   contents: write

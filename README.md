@@ -59,32 +59,27 @@ yfinance gère la session Yahoo (cookie + crumb) et récupère les 56 tickers en
 « propre » (poste perso)** : les IP datacenter de GitHub Actions sont bloquées par Yahoo, d'où le
 choix de Marketstack pour le quotidien. Relancer ce script de temps en temps étend l'historique.
 
-### Actualisation quotidienne (cours réels)
+### Actualisation quotidienne (cron LOCAL sur le Mac)
 
-Une **GitHub Action** (`.github/workflows/update-quotes.yml`) s'exécute chaque jour à **06:30 UTC**
-(après la clôture US de la veille) :
+La fraîcheur quotidienne est assurée par un **cron local launchd** (et non GitHub Actions) :
+`scripts/fetch-history.py` doit tourner depuis une **IP « propre »** car Yahoo bloque les IP
+datacenter de GitHub Actions.
 
-1. `scripts/update-quotes.mjs` récupère les clôtures journalières réelles via l'API **Marketstack**
-   (endpoint EOD, tous les symboles en **un seul appel** → ~30 requêtes/mois, sous le quota gratuit
-   de 100/mois) pour chaque actif et les accumule dans `public/data/quotes.json` ;
-2. le fichier est committé **uniquement s'il a changé**, ce qui déclenche un redéploiement Vercel.
+- `scripts/daily-refresh.sh` : lance le pull yfinance puis **committe/pousse** `history.json` s'il a
+  changé (déclenche un redéploiement Vercel). N'agit que sur ce fichier.
+- `com.backtest.daily-refresh.plist` : agent launchd qui exécute le script **chaque jour à 08:30**
+  (rejoué au réveil si le Mac était éteint). Installation :
 
-Au chargement, `useMarketData` lit `quotes.json` et **greffe** les cours réels récents sur la fin de
-l'historique synthétique, en continuité (mise à l'échelle par le premier cours collecté) et en
-conservant un calendrier mensuel homogène pour le moteur de simulation. En l'absence de fichier (ou
-de données), l'app retombe sur l'historique de démonstration. La source et la date d'actualisation
-sont indiquées dans le pied de page.
+```bash
+cp com.backtest.daily-refresh.plist ~/Library/LaunchAgents/   # adapter les chemins absolus
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.backtest.daily-refresh.plist
+# logs : ~/Library/Logs/backtest-refresh.log
+```
 
-> **Pré-requis (une seule fois)** : créer une clé gratuite sur
-> [marketstack.com/signup](https://marketstack.com/signup), puis l'ajouter au dépôt GitHub dans
-> **Settings → Secrets and variables → Actions → New repository secret**, nom `MARKETSTACK_API_KEY`.
-> Sans cette clé, le job **échoue volontairement** (rouge) au lieu de produire un fichier vide en
-> silence — un run vert garantit donc que de vrais cours ont été écrits.
->
-> Déclenchement manuel possible depuis l'onglet **Actions** de GitHub (« Run workflow »).
->
-> _Note : Yahoo Finance, utilisé initialement, rate-limite (HTTP 429) les requêtes par lot depuis les
-> IP de GitHub Actions et ne récupérait donc rien ; d'où le passage à Marketstack._
+> _Pourquoi pas GitHub Actions ?_ Yahoo bloque les IP datacenter (yfinance n'y marche pas), et le
+> plan gratuit Marketstack facture **par symbole** (100/mois) → impossible de couvrir 56 actifs/jour.
+> Le workflow `update-quotes.yml` (Marketstack) reste disponible en **déclenchement manuel** pour qui
+> dispose d'un plan payant.
 
 ## 💰 Monétisation
 
