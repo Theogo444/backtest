@@ -106,17 +106,17 @@ export default function EnvelopeComparator({ config, marketData }) {
           Options fiscales
         </h2>
         <div className="grid gap-3 sm:grid-cols-3">
-          <div>
-            <label className="label">Imposition du CTO</label>
-            <select value={ctoMethod} onChange={(e) => setCtoMethod(e.target.value)} className="field">
+          <div className="flex h-full flex-col">
+            <label className="label leading-tight">Imposition du CTO</label>
+            <select value={ctoMethod} onChange={(e) => setCtoMethod(e.target.value)} className="field mt-auto">
               <option value="pfu">Flat tax (PFU 30 %)</option>
               <option value="bareme">Barème progressif</option>
             </select>
           </div>
           {ctoMethod === 'bareme' && (
-            <div>
-              <label className="label">Tranche marginale (TMI)</label>
-              <select value={tmi} onChange={(e) => setTmi(Number(e.target.value))} className="field">
+            <div className="flex h-full flex-col">
+              <label className="label leading-tight">Tranche marginale (TMI)</label>
+              <select value={tmi} onChange={(e) => setTmi(Number(e.target.value))} className="field mt-auto">
                 {[0, 0.11, 0.3, 0.41, 0.45].map((t) => (
                   <option key={t} value={t}>
                     {Math.round(t * 100)} %
@@ -125,7 +125,7 @@ export default function EnvelopeComparator({ config, marketData }) {
               </select>
             </div>
           )}
-          <label className="flex items-end gap-2 pb-2 text-sm">
+          <label className="flex h-full items-end gap-2 pb-2 text-sm">
             <input type="checkbox" checked={couple} onChange={(e) => setCouple(e.target.checked)} className="h-4 w-4 accent-navy-700" />
             <span>Couple (abattement AV doublé)</span>
           </label>
@@ -257,9 +257,10 @@ function PageShell({ children }) {
 
 function Recap({ label, value, tone }) {
   return (
-    <div>
-      <div className="text-xs font-semibold uppercase text-navy-400">{label}</div>
-      <div className={`text-lg font-extrabold tabular-nums ${tone === 'gain' ? 'text-gain' : 'text-navy-800 dark:text-white'}`}>
+    <div className="flex h-full flex-col">
+      {/* Hauteur de libellé réservée → valeurs alignées sur la même ligne */}
+      <div className="min-h-[2rem] text-xs font-semibold uppercase leading-tight text-navy-400">{label}</div>
+      <div className={`mt-auto text-lg font-extrabold tabular-nums ${tone === 'gain' ? 'text-gain' : 'text-navy-800 dark:text-white'}`}>
         {value}
       </div>
     </div>

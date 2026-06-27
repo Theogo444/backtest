@@ -215,9 +215,12 @@ function Field({ label, value, onChange, suffix, step = 1 }) {
 function StatCard({ label, value, tone }) {
   const toneClass = tone === 'gain' ? 'text-gain' : tone === 'loss' ? 'text-loss' : 'text-navy-800 dark:text-white'
   return (
-    <div className="card">
-      <div className="text-xs font-semibold uppercase text-navy-400">{label}</div>
-      <div className={`text-lg font-extrabold tabular-nums ${toneClass}`}>{value}</div>
+    <div className="flex min-h-[6rem] flex-col rounded-2xl bg-white p-4 shadow-sm ring-1 ring-navy-100 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:bg-navy-900 dark:ring-navy-800">
+      {/* Hauteur de libellé réservée → toutes les valeurs sur la même ligne */}
+      <div className="min-h-[2rem] text-[11px] font-semibold uppercase leading-tight tracking-wide text-navy-400">
+        {label}
+      </div>
+      <div className={`mt-auto text-xl font-extrabold tabular-nums ${toneClass}`}>{value}</div>
     </div>
   )
 }

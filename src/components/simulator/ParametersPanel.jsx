@@ -7,14 +7,18 @@ import { PERIODS } from '../../hooks/useSimulation'
 import Tooltip from '../ui/Tooltip'
 
 // --- Petits champs réutilisables ---
+// Chaque champ est une colonne flex pleine hauteur dont le contrôle est poussé
+// en bas (`mt-auto`). Dans une grille, les cellules s'étirent à la même
+// hauteur : les champs s'alignent donc, quel que soit le nombre de lignes du
+// libellé (ex. « Type de frais de courtage » sur 2 lignes vs « Frais » sur 1).
 function NumberField({ label, value, onChange, min, step = 1, suffix, tooltip }) {
   return (
-    <div>
-      <label className="label flex items-center gap-1">
+    <div className="flex h-full flex-col">
+      <label className="label flex items-center gap-1 leading-tight">
         {label}
         {tooltip && <Tooltip text={tooltip} />}
       </label>
-      <div className="flex items-center gap-1">
+      <div className="mt-auto flex items-center gap-1">
         <input
           type="number"
           value={value}
@@ -31,12 +35,12 @@ function NumberField({ label, value, onChange, min, step = 1, suffix, tooltip })
 
 function SelectField({ label, value, onChange, options, tooltip }) {
   return (
-    <div>
-      <label className="label flex items-center gap-1">
+    <div className="flex h-full flex-col">
+      <label className="label flex items-center gap-1 leading-tight">
         {label}
         {tooltip && <Tooltip text={tooltip} />}
       </label>
-      <select value={value} onChange={(e) => onChange(e.target.value)} className="field">
+      <select value={value} onChange={(e) => onChange(e.target.value)} className="field mt-auto">
         {options.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
