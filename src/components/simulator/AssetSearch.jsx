@@ -3,7 +3,7 @@
 // ============================================================================
 
 import { useState, useMemo } from 'react'
-import { Search, Plus, X, Scale } from 'lucide-react'
+import { Search, Plus, X, Scale, Lock, LockOpen } from 'lucide-react'
 
 // Pastilles d'éligibilité aux enveloppes fiscales (PEA / CTO / Assurance-vie)
 function EnvelopeBadges({ envelopes, size = 'sm' }) {
@@ -39,6 +39,8 @@ function EnvelopeBadges({ envelopes, size = 'sm' }) {
 export default function AssetSearch({ allAssets, selectedAssets, onChange, autoRebalance, onToggleRebalance }) {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
+  // Actifs dont le pourcentage est figé (ne bouge pas lors d'un réglage voisin)
+  const [locked, setLocked] = useState({})
 
   const selectedIds = selectedAssets.map((s) => s.id)
 
@@ -78,76 +80,95 @@ export default function AssetSearch({ allAssets, selectedAssets, onChange, autoR
     setOpen(false)
   }
 
+  const num = (v) => Number(v) || 0
+
   function removeAsset(id) {
-    // On retire l'actif SANS toucher aux pourcentages des autres
-    // (ex. retirer D de 40/40/10/10 → 40/40/10, normalisé à la simulation).
     const remaining = selectedAssets.filter((s) => s.id !== id)
-    onChange(remaining)
-  }
-
-  function setAllocation(id, rawValue) {
-    const newVal = Math.min(100, Math.max(0, Number(rawValue)))
-    const others = selectedAssets.filter((s) => s.id !== id)
-    const remaining = 100 - newVal
-    const othersTotal = others.reduce((sum, s) => sum + (Number(s.allocation) || 0), 0)
-
-    let scaled
-    if (others.length === 0) {
-      onChange(selectedAssets.map((s) => (s.id === id ? { ...s, allocation: newVal } : s)))
+    // Oublie le verrou de l'actif retiré
+    setLocked((l) => {
+      const copy = { ...l }
+      delete copy[id]
+      return copy
+    })
+    if (remaining.length === 0) {
+      onChange([])
       return
     }
-    if (othersTotal === 0 || remaining <= 0) {
-      const share = remaining > 0 ? Math.round(remaining / others.length) : 0
-      let used = 0
-      scaled = others.map((s, i) => {
-        if (i === others.length - 1) return { ...s, allocation: Math.max(0, remaining - used) }
-        used += share
-        return { ...s, allocation: Math.max(0, share) }
-      })
-    } else {
-      let used = 0
-      scaled = others.map((s, i) => {
-        if (i === others.length - 1) return { ...s, allocation: Math.max(0, remaining - used) }
-        const v = Math.round(((Number(s.allocation) || 0) / othersTotal) * remaining)
+    // Renormalise à 100 % en conservant les proportions relatives
+    const total = remaining.reduce((sum, s) => sum + num(s.allocation), 0)
+    if (total <= 0) {
+      onChange(remaining)
+      return
+    }
+    let used = 0
+    onChange(
+      remaining.map((s, i) => {
+        const v = i === remaining.length - 1 ? 100 - used : Math.round((num(s.allocation) / total) * 100)
         used += v
         return { ...s, allocation: v }
-      })
-    }
-    onChange(
-      selectedAssets.map((s) => {
-        if (s.id === id) return { ...s, allocation: newVal }
-        return scaled.find((o) => o.id === s.id) || s
       }),
     )
   }
 
-  function balanceEqually() {
-    const n = selectedAssets.length
-    if (n === 0) return
-    const equal = Math.round(100 / n)
+  function toggleLock(id) {
+    setLocked((l) => ({ ...l, [id]: !l[id] }))
+  }
+
+  // Règle l'allocation d'un actif. La différence est absorbée UNIQUEMENT par les
+  // autres actifs déverrouillés (proportionnellement à leur valeur), de sorte que
+  // le total reste exactement à 100 % et que les actifs verrouillés ne bougent pas.
+  function setAllocation(id, rawValue) {
+    const target = Math.max(0, Math.min(100, num(rawValue)))
+    const others = selectedAssets.filter((s) => s.id !== id)
+    const unlockedOthers = others.filter((s) => !locked[s.id])
+    const lockedTotal = others.filter((s) => locked[s.id]).reduce((sum, s) => sum + num(s.allocation), 0)
+
+    // L'actif réglé ne peut pas dépasser ce que les déverrouillés peuvent céder
+    const maxForEditing = Math.max(0, 100 - lockedTotal)
+    // Sans aucun voisin déverrouillé, l'actif réglé absorbe tout le solde
+    const newVal = unlockedOthers.length === 0 ? maxForEditing : Math.min(target, maxForEditing)
+    const remaining = Math.max(0, 100 - lockedTotal - newVal)
+
+    // Répartit `remaining` sur les déverrouillés (proportionnel, sinon équitable)
+    const unlockedTotal = unlockedOthers.reduce((sum, s) => sum + num(s.allocation), 0)
+    const distMap = {}
+    let used = 0
+    unlockedOthers.forEach((s, i) => {
+      let v
+      if (i === unlockedOthers.length - 1) {
+        v = remaining - used
+      } else if (unlockedTotal > 0) {
+        v = Math.round((num(s.allocation) / unlockedTotal) * remaining)
+      } else {
+        v = Math.round(remaining / unlockedOthers.length)
+      }
+      used += v
+      distMap[s.id] = Math.max(0, v)
+    })
+
     onChange(
-      selectedAssets.map((s, i) => ({
-        ...s,
-        allocation: i === n - 1 ? 100 - equal * (n - 1) : equal,
-      })),
+      selectedAssets.map((s) => {
+        if (s.id === id) return { ...s, allocation: newVal }
+        if (locked[s.id]) return s
+        return { ...s, allocation: distMap[s.id] ?? num(s.allocation) }
+      }),
     )
   }
 
-  // Met à l'échelle les allocations actuelles pour que leur somme fasse 100 %,
-  // en conservant leurs proportions relatives.
-  function normalizeTo100() {
+  // Répartit tout à parts égales et libère tous les verrous
+  function balanceEqually() {
     const n = selectedAssets.length
     if (n === 0) return
-    const total = selectedAssets.reduce((sum, s) => sum + (Number(s.allocation) || 0), 0)
-    if (total <= 0) return balanceEqually()
-    let acc = 0
-    const scaled = selectedAssets.map((s, i) => {
-      if (i === n - 1) return { ...s, allocation: 100 - acc }
-      const val = Math.round(((Number(s.allocation) || 0) / total) * 100)
-      acc += val
-      return { ...s, allocation: val }
-    })
-    onChange(scaled)
+    setLocked({})
+    const equal = Math.floor(100 / n)
+    let used = 0
+    onChange(
+      selectedAssets.map((s, i) => {
+        const v = i === n - 1 ? 100 - used : equal
+        used += v
+        return { ...s, allocation: v }
+      }),
+    )
   }
 
   const totalAlloc = selectedAssets.reduce((sum, s) => sum + (Number(s.allocation) || 0), 0)
@@ -226,6 +247,12 @@ export default function AssetSearch({ allAssets, selectedAssets, onChange, autoR
         {selectedAssets.map((s) => {
           const asset = getAsset(s.id)
           if (!asset) return null
+          const isLocked = !!locked[s.id]
+          // Plafond du curseur = 100 % moins ce qui est figé sur les autres actifs
+          const lockedElsewhere = selectedAssets
+            .filter((o) => o.id !== s.id && locked[o.id])
+            .reduce((sum, o) => sum + (Number(o.allocation) || 0), 0)
+          const rowMax = Math.max(0, 100 - lockedElsewhere)
           return (
             <div key={s.id} className="rounded-lg border border-navy-100 p-3 dark:border-navy-800">
               <div className="flex items-center justify-between gap-2">
@@ -246,26 +273,43 @@ export default function AssetSearch({ allAssets, selectedAssets, onChange, autoR
                 </div>
               </div>
               {selectedAssets.length > 1 && (
-                <div className="mt-2 flex items-center gap-3">
+                <div className="mt-2 flex items-center gap-2.5">
                   <input
                     type="range"
                     min="0"
-                    max="100"
-                    value={s.allocation}
+                    max={rowMax}
+                    value={Math.min(Number(s.allocation) || 0, rowMax)}
+                    disabled={isLocked}
                     onChange={(e) => setAllocation(s.id, e.target.value)}
-                    className="h-1.5 flex-1 cursor-pointer accent-navy-700"
+                    className={`h-1.5 flex-1 accent-navy-700 ${isLocked ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'}`}
                   />
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5">
                     <input
                       type="number"
                       min="0"
-                      max="100"
+                      max={rowMax}
                       value={s.allocation}
+                      disabled={isLocked}
                       onChange={(e) => setAllocation(s.id, e.target.value)}
-                      className="w-14 rounded border border-navy-200 px-1.5 py-0.5 text-right text-sm dark:border-navy-700 dark:bg-navy-800"
+                      className={`w-12 rounded border border-navy-200 px-1.5 py-0.5 text-right text-sm dark:border-navy-700 dark:bg-navy-800 ${
+                        isLocked ? 'opacity-60' : ''
+                      }`}
                     />
                     <span className="text-xs text-navy-400">%</span>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleLock(s.id)}
+                    aria-label={isLocked ? `Déverrouiller ${asset.name}` : `Verrouiller ${asset.name}`}
+                    title={isLocked ? 'Pourcentage figé — cliquez pour libérer' : 'Figer ce pourcentage'}
+                    className={`shrink-0 rounded p-1 transition ${
+                      isLocked
+                        ? 'bg-navy-100 text-navy-700 dark:bg-navy-700 dark:text-navy-100'
+                        : 'text-navy-300 hover:text-navy-500 dark:text-navy-500 dark:hover:text-navy-300'
+                    }`}
+                  >
+                    {isLocked ? <Lock size={14} /> : <LockOpen size={14} />}
+                  </button>
                 </div>
               )}
             </div>
@@ -277,20 +321,21 @@ export default function AssetSearch({ allAssets, selectedAssets, onChange, autoR
       {selectedAssets.length > 1 && (
         <div className="mt-3 space-y-2">
           <div className="flex items-center justify-between gap-2 text-xs">
-            <div className="flex items-center gap-3">
-              <button onClick={balanceEqually} className="font-semibold text-navy-600 hover:underline dark:text-navy-300">
-                Répartir équitablement
-              </button>
-              {totalAlloc !== 100 && (
-                <button onClick={normalizeTo100} className="font-semibold text-navy-600 hover:underline dark:text-navy-300">
-                  Normaliser à 100 %
-                </button>
-              )}
-            </div>
-            <span className={totalAlloc === 100 ? 'text-gain' : 'text-loss font-semibold'}>
-              Total : {totalAlloc}%{totalAlloc !== 100 ? ' (sera normalisé à 100 %)' : ''}
+            <button onClick={balanceEqually} className="font-semibold text-navy-600 hover:underline dark:text-navy-300">
+              Répartir équitablement
+            </button>
+            <span className={`font-semibold tabular-nums ${totalAlloc === 100 ? 'text-gain' : 'text-loss'}`}>
+              Total : {totalAlloc} %
             </span>
           </div>
+
+          <p className="flex items-start gap-1 text-[11px] leading-snug text-navy-400">
+            <LockOpen size={12} className="mt-0.5 shrink-0" />
+            <span>
+              Réglez un curseur : les autres s'ajustent pour garder 100 %. Cliquez sur le cadenas
+              pour figer un pourcentage et le protéger des ajustements.
+            </span>
+          </p>
 
           <label className="flex cursor-pointer items-center gap-2 rounded-lg bg-navy-50 px-3 py-2 text-sm dark:bg-navy-800">
             <input
