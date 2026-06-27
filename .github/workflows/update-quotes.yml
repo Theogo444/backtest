@@ -1,14 +1,26 @@
 name: Actualisation quotidienne des cours
 
-# Récupère chaque jour les clôtures réelles de la veille (Yahoo Finance),
+# Récupère chaque jour les clôtures réelles de la veille (Marketstack),
 # met à jour public/data/quotes.json et committe. Vercel redéploie ensuite
 # automatiquement le site avec les données fraîches.
+#
+# Pré-requis : un secret de dépôt MARKETSTACK_API_KEY (clé gratuite
+# https://marketstack.com/signup). Sans lui, le job échoue volontairement
+# (rouge) plutôt que de produire un fichier vide en silence.
 
 on:
   schedule:
-    # 06:00 UTC (~07:00 Paris l'hiver, ~08:00 l'été) — après la clôture US.
-    - cron: '0 6 * * *'
+    # 06:30 UTC (~07:30 Paris l'hiver, ~08:30 l'été) — après la clôture US de
+    # la veille, le temps que Marketstack consolide les EOD.
+    - cron: '30 6 * * *'
   workflow_dispatch: {} # permet aussi un déclenchement manuel depuis l'onglet Actions
+  push:
+    # Re-teste automatiquement dès qu'on modifie l'updater (pas sur les commits
+    # quotidiens de quotes.json → pas de boucle).
+    branches: [master]
+    paths:
+      - 'scripts/update-quotes.mjs'
+      - '.github/workflows/update-quotes.yml'
 
 permissions:
   contents: write
@@ -35,6 +47,8 @@ jobs:
         run: npm ci
 
       - name: Récupère les cours et met à jour quotes.json
+        env:
+          MARKETSTACK_API_KEY: ${{ secrets.MARKETSTACK_API_KEY }}
         run: |
           npx esbuild scripts/update-quotes.mjs --bundle --platform=node \
             --format=esm --outfile=scripts/.update-quotes.bundle.mjs

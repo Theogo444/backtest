@@ -40,10 +40,12 @@ ETF et actions de référence), avec krachs historiques reproduits (2000, 2008, 
 
 ### Actualisation quotidienne (cours réels)
 
-Une **GitHub Action** (`.github/workflows/update-quotes.yml`) s'exécute chaque jour à **06:00 UTC** :
+Une **GitHub Action** (`.github/workflows/update-quotes.yml`) s'exécute chaque jour à **06:30 UTC**
+(après la clôture US de la veille) :
 
-1. `scripts/update-quotes.mjs` récupère les clôtures journalières réelles (Yahoo Finance, côté
-   serveur → pas de CORS) pour chaque actif et les accumule dans `public/data/quotes.json` ;
+1. `scripts/update-quotes.mjs` récupère les clôtures journalières réelles via l'API **Marketstack**
+   (endpoint EOD, tous les symboles en **un seul appel** → ~30 requêtes/mois, sous le quota gratuit
+   de 100/mois) pour chaque actif et les accumule dans `public/data/quotes.json` ;
 2. le fichier est committé **uniquement s'il a changé**, ce qui déclenche un redéploiement Vercel.
 
 Au chargement, `useMarketData` lit `quotes.json` et **greffe** les cours réels récents sur la fin de
@@ -52,7 +54,16 @@ conservant un calendrier mensuel homogène pour le moteur de simulation. En l'ab
 de données), l'app retombe sur l'historique de démonstration. La source et la date d'actualisation
 sont indiquées dans le pied de page.
 
+> **Pré-requis (une seule fois)** : créer une clé gratuite sur
+> [marketstack.com/signup](https://marketstack.com/signup), puis l'ajouter au dépôt GitHub dans
+> **Settings → Secrets and variables → Actions → New repository secret**, nom `MARKETSTACK_API_KEY`.
+> Sans cette clé, le job **échoue volontairement** (rouge) au lieu de produire un fichier vide en
+> silence — un run vert garantit donc que de vrais cours ont été écrits.
+>
 > Déclenchement manuel possible depuis l'onglet **Actions** de GitHub (« Run workflow »).
+>
+> _Note : Yahoo Finance, utilisé initialement, rate-limite (HTTP 429) les requêtes par lot depuis les
+> IP de GitHub Actions et ne récupérait donc rien ; d'où le passage à Marketstack._
 
 ## 💰 Monétisation
 

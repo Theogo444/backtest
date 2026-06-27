@@ -5,7 +5,7 @@
 //  • Base : jeu de données synthétique long terme (2000 → 2026), defaultAssets.js
 //  • Couche « live » : un fichier public/data/quotes.json, rafraîchi chaque jour
 //    par une GitHub Action (cf. scripts/update-quotes.mjs + .github/workflows),
-//    contient les cours de clôture quotidiens réels (Yahoo Finance).
+//    contient les cours de clôture quotidiens réels (API Marketstack).
 //
 //  Au chargement, on tente de récupérer quotes.json et de GREFFER les cours
 //  réels récents sur la fin de l'historique synthétique. La greffe est faite en

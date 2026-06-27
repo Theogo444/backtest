@@ -24,7 +24,7 @@ export default function Footer({ onNavigate, source, updatedAt }) {
             Données :{' '}
             <span className="font-semibold">
               {source === 'live'
-                ? 'historique de démonstration + cours réels (Yahoo Finance)'
+                ? 'historique de démonstration + cours réels (Marketstack)'
                 : 'jeu de démonstration local'}
             </span>
             {source === 'live' && updatedLabel && (
