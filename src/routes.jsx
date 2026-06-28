@@ -13,6 +13,7 @@ import MonteCarloPage from './pages/MonteCarloPage'
 import GlossaryPage from './pages/GlossaryPage'
 import GuidesIndex from './pages/GuidesIndex'
 import GuideArticle from './pages/GuideArticle'
+import PrivacyPolicy from './pages/PrivacyPolicy'
 import NotFound from './pages/NotFound'
 import { GUIDE_SLUGS } from './data/guides'
 
@@ -36,6 +37,7 @@ export const routes = [
         // getStaticPaths attend les chemins COMPLETS, pas seulement le slug.
         getStaticPaths: () => GUIDE_SLUGS.map((slug) => `/guides/${slug}`),
       },
+      { path: 'confidentialite', element: <PrivacyPolicy /> },
       // Page 404 pré-rendue (dist/404.html). Vercel la sert avec un statut HTTP
       // 404 réel pour toute URL inconnue (cf. vercel.json sans fallback SPA).
       { path: '404', element: <NotFound /> },

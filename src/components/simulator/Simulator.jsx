@@ -2,21 +2,69 @@
 //  Simulator.jsx — page principale du simulateur de portefeuille
 // ============================================================================
 
+import { useEffect, useRef } from 'react'
 import { AlertCircle } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import AssetSearch from './AssetSearch'
 import StrategySelector from './StrategySelector'
 import ParametersPanel from './ParametersPanel'
 import ResultsMetrics from './ResultsMetrics'
 import ResultsCharts from './ResultsCharts'
 import AdSlot from '../layout/AdSlot'
+import ShareResult from '../marketing/ShareResult'
+import EmailCapture from '../marketing/EmailCapture'
 import { MetricsSkeleton, ChartSkeleton } from '../ui/Skeleton'
-import { useSimulation } from '../../hooks/useSimulation'
+import { useSimulation, PERIODS } from '../../hooks/useSimulation'
+import { STRATEGIES } from '../../utils/strategies'
+import { formatEUR, formatPct } from '../../utils/metrics'
+import {
+  encodeAdvancedConfig, decodeAdvancedConfig, buildShareUrl,
+} from '../../utils/share'
 
 export default function Simulator({ config, updateConfig, marketData }) {
   const { assets, loading, source } = marketData
 
   const result = useSimulation({ ...config, allAssets: assets })
+
+  // --- Restauration des paramètres depuis l'URL partagée (une seule fois) ---
+  const [searchParams] = useSearchParams()
+  const restored = useRef(false)
+  useEffect(() => {
+    if (restored.current) return
+    restored.current = true
+    const patch = decodeAdvancedConfig(searchParams)
+    if (patch) {
+      updateConfig({
+        ...patch,
+        ...(patch.params ? { params: { ...config.params, ...patch.params } } : {}),
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // --- Lien partageable + modèle de carte PNG (reflètent la config courante) ---
+  const shareUrl = buildShareUrl('/simulateur', encodeAdvancedConfig(config))
+  const stratName = STRATEGIES.find((s) => s.id === config.strategy)?.name || 'Backtest'
+  const periodLabel = PERIODS.find((p) => p.id === config.period)?.label || ''
+  const firstAsset = assets.find((a) => a.id === config.selectedAssets[0]?.id)
+  const assetLabel =
+    config.selectedAssets.length > 1
+      ? `${config.selectedAssets.length} actifs`
+      : firstAsset?.name || 'portefeuille'
+  const card = result
+    ? {
+        eyebrow: 'Backtest',
+        headline: `${stratName} · ${assetLabel} · ${periodLabel}`,
+        bigValue: formatEUR(result.metrics.finalValue),
+        bigLabel: `Valeur finale · ${formatEUR(result.metrics.totalInvested)} investis`,
+        stats: [
+          { label: 'Plus-value', value: formatEUR(result.metrics.gainAbs, 0) },
+          { label: 'Perf. annualisée', value: result.metrics.cagr != null ? formatPct(result.metrics.cagr, true) : '—' },
+          { label: 'Max drawdown', value: formatPct(result.metrics.maxDrawdown) },
+        ],
+        footer: shareUrl.replace(/^https?:\/\//, ''),
+      }
+    : null
 
   return (
     <section>
@@ -76,6 +124,23 @@ export default function Simulator({ config, updateConfig, marketData }) {
               <AdSlot format="rectangle" position="RESULTS_RECTANGLE" />
 
               <ResultsCharts result={result} />
+
+              {/* Partage du backtest (lien + image) */}
+              <ShareResult
+                url={shareUrl}
+                card={card}
+                trackingId="simulateur_avance"
+                title="Mon backtest d'investissement"
+              />
+
+              {/* Capture email contextuelle */}
+              <EmailCapture
+                variant="band"
+                source="simulator_advanced"
+                leadMagnet="les meilleures stratégies DCA 2026"
+                title="Recevez les meilleures stratégies DCA 2026"
+                subtitle="Le guide pour investir au bon rythme, avec les frais et l'enveloppe adaptés à votre profil."
+              />
             </>
           )}
         </div>

@@ -7,7 +7,8 @@
 //  (compareEnvelopes). Les frais du courtier choisi alimentent le moteur.
 // ============================================================================
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer,
 } from 'recharts'
@@ -17,10 +18,13 @@ import {
 } from 'lucide-react'
 import AssetSearch from './AssetSearch'
 import AdSlot from '../layout/AdSlot'
+import ShareResult from '../marketing/ShareResult'
+import EmailCapture from '../marketing/EmailCapture'
 import { useSimulation } from '../../hooks/useSimulation'
 import { compareEnvelopes } from '../../utils/fiscalite'
 import { formatEUR, formatPct } from '../../utils/metrics'
 import { BROKERS, getBroker, brokerFeeConfig, ENVELOPE_LABELS, FEES_AS_OF } from '../../data/brokers'
+import { encodeBeginnerState, decodeBeginnerState, buildShareUrl } from '../../utils/share'
 
 // ---------------------------------------------------------------------------
 //  Métadonnées éditoriales
@@ -95,6 +99,24 @@ export default function BeginnerSimulator({ marketData }) {
     if (!broker.accounts.includes(envelope)) setEnvelope(broker.accounts[0])
   }, [brokerId]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Restauration des paramètres depuis l'URL partagée (une seule fois).
+  const [searchParams] = useSearchParams()
+  const restored = useRef(false)
+  useEffect(() => {
+    if (restored.current) return
+    restored.current = true
+    const s = decodeBeginnerState(searchParams)
+    if (!s) return
+    if (s.brokerId) setBrokerId(s.brokerId)
+    if (s.envelope) setEnvelope(s.envelope)
+    if (s.selectedAssets) setSelectedAssets(s.selectedAssets)
+    if (s.planId) setPlanId(s.planId)
+    if (s.amount != null) setAmount(s.amount)
+    if (s.period) setPeriod(s.period)
+    if (s.autoRebalance) setAutoRebalance(s.autoRebalance)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Configuration moteur (frais du courtier + enveloppe).
   const cfg = useMemo(() => {
     const { fees, feeAnnualMgmt } = brokerFeeConfig(broker, envelope)
@@ -157,6 +179,26 @@ export default function BeginnerSimulator({ marketData }) {
   }, [result])
 
   const picks = plan.kind === 'monthly' ? MONTHLY_PICKS : ONEOFF_PICKS
+
+  // Lien partageable + carte PNG (reflètent les choix courants).
+  const shareUrl = buildShareUrl(
+    '/simulateur-debutant',
+    encodeBeginnerState({ brokerId, envelope, selectedAssets, planId, amount, period, autoRebalance }),
+  )
+  const shareCard = summary
+    ? {
+        eyebrow: `${broker.name} · ${ENVELOPE_LABELS[envelope]}`,
+        headline: `${plan.kind === 'monthly' ? `${formatEUR(Number(amount) || 0)}/mois` : formatEUR(Number(amount) || 0)} sur ${assetNames.length <= 1 ? assetNames[0] || 'votre portefeuille' : `${assetNames.length} actifs`} pendant ${summary.years} ans`,
+        bigValue: formatEUR(summary.netFinal),
+        bigLabel: `Valeur finale nette · ${formatEUR(summary.totalInvested)} investis`,
+        stats: [
+          { label: 'Plus-value nette', value: formatEUR(summary.netGain, 0) },
+          { label: 'Votre argent ×', value: summary.multiple > 0 ? `${summary.multiple.toFixed(1)}×` : '—' },
+          { label: 'Rendement/an', value: summary.cagr != null ? formatPct(summary.cagr, true) : '—' },
+        ],
+        footer: 'simulateur-portefeuille.fr',
+      }
+    : null
 
   return (
     <section>
@@ -333,15 +375,34 @@ export default function BeginnerSimulator({ marketData }) {
               <p>Sélectionnez au moins un actif pour voir le résultat.</p>
             </div>
           ) : (
-            <ResultPanel
-              broker={broker}
-              envelope={envelope}
-              plan={plan}
-              amount={Number(amount) || 0}
-              assetNames={assetNames}
-              summary={summary}
-              chartData={chartData}
-            />
+            <>
+              <ResultPanel
+                broker={broker}
+                envelope={envelope}
+                plan={plan}
+                amount={Number(amount) || 0}
+                assetNames={assetNames}
+                summary={summary}
+                chartData={chartData}
+              />
+
+              {/* Partage du résultat (lien + image) */}
+              <ShareResult
+                url={shareUrl}
+                card={shareCard}
+                trackingId="simulateur_debutant"
+                title="Ma simulation d'investissement"
+              />
+
+              {/* Capture email contextuelle */}
+              <EmailCapture
+                variant="band"
+                source="simulator_beginner"
+                leadMagnet="le comparatif PEA 2026"
+                title="Recevez le comparatif PEA 2026"
+                subtitle="Le bon courtier, les bons ETF et les frais à éviter — pour bien démarrer."
+              />
+            </>
           )}
         </div>
       </div>

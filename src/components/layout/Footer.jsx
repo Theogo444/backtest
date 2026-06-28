@@ -48,6 +48,7 @@ export default function Footer({ source, updatedAt }) {
               ['/monte-carlo', 'Monte Carlo'],
               ['/guides', 'Guides'],
               ['/glossaire', 'Glossaire'],
+              ['/confidentialite', 'Confidentialité'],
             ].map(([to, label]) => (
               <li key={to}>
                 <Link to={to} className="transition hover:text-navy-800 dark:hover:text-white">

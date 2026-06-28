@@ -24,6 +24,7 @@ const STATIC_ROUTES = [
   { path: '/monte-carlo', changefreq: 'monthly', priority: '0.7' },
   { path: '/glossaire', changefreq: 'monthly', priority: '0.6' },
   { path: '/guides', changefreq: 'weekly', priority: '0.9' },
+  { path: '/confidentialite', changefreq: 'yearly', priority: '0.2' },
 ]
 
 // Découverte des guides : on importe chaque module pour lire slug + date réels.

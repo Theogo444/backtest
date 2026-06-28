@@ -10,6 +10,7 @@ import {
   PiggyBank, Wallet, Star, TrendingUp, Clock,
 } from 'lucide-react'
 import AdSlot from '../components/layout/AdSlot'
+import EmailCapture from '../components/marketing/EmailCapture'
 import { BROKERS } from '../data/affiliates'
 import { GUIDES } from '../data/guides'
 
@@ -237,6 +238,20 @@ export default function Home() {
           Tous les guides <ArrowRight size={14} />
         </Link>
       </section>
+
+      {/* ----------------------- Capture email (lead magnet) ----------------------- */}
+      <EmailCapture
+        className="mt-10"
+        variant="band"
+        source="home_band"
+        leadMagnet="le comparatif PEA 2026"
+        title="Recevez le comparatif PEA 2026"
+        subtitle="Frais réels, ETF éligibles et le bon courtier selon votre profil — en un PDF clair."
+        bullets={[
+          'Les frais des principaux courtiers comparés',
+          'Comment éviter les erreurs qui coûtent cher',
+        ]}
+      />
 
       {/* --------------------------- Contenu SEO --------------------------- */}
       <section className="card mt-10">

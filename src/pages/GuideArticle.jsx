@@ -8,6 +8,7 @@ import { Link, useParams, Navigate } from 'react-router-dom'
 import { marked } from 'marked'
 import { Clock, ChevronRight, ArrowRight, ShieldCheck, LineChart } from 'lucide-react'
 import AdSlot from '../components/layout/AdSlot'
+import EmailCapture from '../components/marketing/EmailCapture'
 import { getGuide, GUIDES } from '../data/guides'
 import { BROKERS } from '../data/affiliates'
 
@@ -28,6 +29,16 @@ export default function GuideArticle() {
   const broker = BROKERS.find((b) => b.envelope === 'PEA') || BROKERS[0]
   const related = GUIDES.filter((g) => g.slug !== guide.slug).slice(0, 2)
   const url = `https://simulateur-portefeuille.fr/guides/${guide.slug}`
+
+  // Lead magnet contextualisé selon le sujet de l'article.
+  const topic = `${guide.category} ${guide.title}`.toLowerCase()
+  const leadMagnet = topic.includes('dca')
+    ? 'les meilleures stratégies DCA 2026'
+    : topic.includes('cto')
+      ? 'le guide PEA vs CTO'
+      : topic.includes('assurance')
+        ? 'le guide Assurance-vie vs PEA'
+        : 'le comparatif PEA 2026'
 
   const articleSchema = {
     '@context': 'https://schema.org',
@@ -122,6 +133,16 @@ export default function GuideArticle() {
             Comparer les enveloppes
           </Link>
         </div>
+
+        {/* Capture email (lead magnet contextualisé) */}
+        <EmailCapture
+          className="mt-8"
+          variant="band"
+          source={`guide_${guide.slug}`}
+          leadMagnet={leadMagnet}
+          title={`Recevez ${leadMagnet}`}
+          subtitle="Un email court et concret pour passer à l'action sans vous tromper."
+        />
 
         {/* AdSense slot: ARTICLE_FOOTER_RECTANGLE */}
         <AdSlot format="rectangle" position="ARTICLE_FOOTER_RECTANGLE" className="mt-8" />
