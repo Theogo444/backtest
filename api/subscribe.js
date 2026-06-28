@@ -42,12 +42,18 @@ export default async function handler(req, res) {
   const listId = Number(process.env.BREVO_LIST_ID || 2)
   const headers = { 'api-key': apiKey, 'content-type': 'application/json', accept: 'application/json' }
 
+  // URL de base déduite du domaine réel de la requête (vercel.app ou domaine
+  // custom) → le PDF est toujours servi depuis le bon hôte, sans config.
+  const proto = req.headers['x-forwarded-proto'] || 'https'
+  const host = req.headers['x-forwarded-host'] || req.headers.host || ''
+  const base = host ? `${proto}://${host}` : SITE
+
   // 1) Ajout du contact ------------------------------------------------------
   const added = await addContact({ email, source, leadMagnet, listId, headers })
   if (!added) return res.status(502).json({ ok: false, error: 'provider_error' })
 
   // 2) Email de bienvenue avec le PDF (best-effort : n'échoue pas la requête) -
-  await sendWelcomeEmail({ email, headers }).catch(() => {})
+  await sendWelcomeEmail({ email, headers, base }).catch(() => {})
 
   return res.status(200).json({ ok: true })
 }
@@ -72,10 +78,10 @@ async function addContact({ email, source, leadMagnet, listId, headers }) {
   }
 }
 
-async function sendWelcomeEmail({ email, headers }) {
+async function sendWelcomeEmail({ email, headers, base }) {
   const senderEmail = process.env.SENDER_EMAIL || 'contact@simulateur-portefeuille.fr'
   const senderName = process.env.SENDER_NAME || 'Simulateur de Portefeuille FR'
-  const pdfUrl = process.env.PDF_URL || `${SITE}/comparatif-pea-2026.pdf`
+  const pdfUrl = process.env.PDF_URL || `${base}/comparatif-pea-2026.pdf`
 
   await fetch(`${BREVO}/smtp/email`, {
     method: 'POST',
@@ -84,13 +90,13 @@ async function sendWelcomeEmail({ email, headers }) {
       sender: { name: senderName, email: senderEmail },
       to: [{ email }],
       subject: 'Votre comparatif PEA 2026 (PDF)',
-      htmlContent: emailHtml(pdfUrl),
+      htmlContent: emailHtml(pdfUrl, base),
       attachment: [{ url: pdfUrl, name: 'comparatif-pea-2026.pdf' }],
     }),
   })
 }
 
-function emailHtml(pdfUrl) {
+function emailHtml(pdfUrl, base = SITE) {
   return `<!doctype html><html lang="fr"><body style="margin:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#1e3a5f">
   <div style="max-width:560px;margin:0 auto;padding:24px">
     <div style="background:#1e3a5f;border-radius:12px 12px 0 0;padding:20px 24px;color:#fff">
@@ -104,7 +110,7 @@ function emailHtml(pdfUrl) {
         <a href="${pdfUrl}" style="background:#1e3a5f;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:700;display:inline-block">Télécharger le comparatif (PDF)</a>
       </p>
       <p>Pour aller plus loin, testez votre scénario sur notre simulateur gratuit :</p>
-      <p><a href="${SITE}/simulateur-debutant" style="color:#1e3a5f;font-weight:700">Lancer une simulation →</a></p>
+      <p><a href="${base}/simulateur-debutant" style="color:#1e3a5f;font-weight:700">Lancer une simulation →</a></p>
       <p style="color:#64748b;font-size:12px;margin-top:28px;border-top:1px solid #e2e8f0;padding-top:14px">
         Vous recevez cet email car vous avez demandé le comparatif PEA 2026 sur simulateur-portefeuille.fr.
         Document à but éducatif, ne constitue pas un conseil en investissement.
