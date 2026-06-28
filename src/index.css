@@ -33,10 +33,37 @@
 @layer components {
   /* Carte standard */
   .card {
-    @apply rounded-2xl bg-white p-5 shadow-sm ring-1 ring-navy-100 transition-colors;
+    @apply rounded-2xl bg-white p-5 shadow-card ring-1 ring-navy-100 transition;
   }
   .dark .card {
     @apply bg-navy-900 ring-navy-800;
+  }
+
+  /* Carte cliquable : effet « lift » premium au survol */
+  .card-link {
+    @apply transition duration-200 hover:-translate-y-0.5 hover:shadow-card-hover hover:ring-navy-200;
+  }
+  .dark .card-link {
+    @apply hover:ring-navy-700;
+  }
+
+  /* Panneau de section teinté : casse la monotonie « tout blanc » */
+  .panel {
+    @apply rounded-3xl bg-navy-50/70 p-5 ring-1 ring-navy-100 md:p-7;
+  }
+  .dark .panel {
+    @apply bg-navy-900/40 ring-navy-800;
+  }
+
+  /* Eyebrow : sur-titre de section (majuscules, interlettrage) */
+  .eyebrow {
+    @apply inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.08em];
+  }
+
+  /* Chiffres alignés (tabulaires) pour les métriques produit */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
   }
 
   /* Champ de saisie */

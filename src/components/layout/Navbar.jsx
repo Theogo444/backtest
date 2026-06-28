@@ -4,7 +4,19 @@
 // ============================================================================
 
 import { NavLink, Link } from 'react-router-dom'
-import { Home, Rocket, LineChart, Scale, Landmark, Dices, Newspaper, BookOpen, Moon, Sun, TrendingUp } from 'lucide-react'
+import { Home, Rocket, LineChart, Scale, Landmark, Dices, Newspaper, BookOpen, Moon, Sun } from 'lucide-react'
+
+// Marque : courbe ascendante + nœud émeraude (cohérente avec le favicon).
+function BrandMark({ className = 'h-9 w-9' }) {
+  return (
+    <svg viewBox="0 0 40 40" className={className} role="img" aria-label="Simulateur de Portefeuille">
+      <rect width="40" height="40" rx="10" fill="#1e3a5f" />
+      <line x1="8" y1="31.5" x2="32" y2="31.5" stroke="#ffffff" strokeOpacity="0.18" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M8 29 L17 21 L23 25 L32 12.5" fill="none" stroke="#34d399" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="32" cy="12.5" r="3.4" fill="#34d399" />
+    </svg>
+  )
+}
 
 export const NAV_ITEMS = [
   { to: '/', label: 'Accueil', icon: Home, end: true },
@@ -22,13 +34,11 @@ export default function Navbar({ theme, onToggleTheme }) {
     <>
       {/* ---------- Sidebar desktop ---------- */}
       <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 md:border-r md:border-navy-100 md:bg-white dark:md:border-navy-800 dark:md:bg-navy-900">
-        <Link to="/" className="flex items-center gap-2 px-6 py-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-navy-800 text-white">
-            <TrendingUp size={20} />
-          </div>
+        <Link to="/" className="flex items-center gap-2.5 px-6 py-5">
+          <BrandMark className="h-9 w-9 shrink-0" />
           <div className="leading-tight">
-            <div className="text-sm font-extrabold text-navy-800 dark:text-white">Simulateur</div>
-            <div className="text-[11px] font-medium text-navy-400">Portefeuille FR</div>
+            <div className="text-sm font-extrabold tracking-tight text-navy-800 dark:text-white">Simulateur</div>
+            <div className="text-[11px] font-semibold text-navy-400">de Portefeuille</div>
           </div>
         </Link>
 
@@ -66,10 +76,8 @@ export default function Navbar({ theme, onToggleTheme }) {
       {/* ---------- Header mobile ---------- */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-navy-100 bg-white px-4 py-3 md:hidden dark:border-navy-800 dark:bg-navy-900">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-navy-800 text-white">
-            <TrendingUp size={18} />
-          </div>
-          <span className="text-sm font-extrabold text-navy-800 dark:text-white">Simulateur Portefeuille</span>
+          <BrandMark className="h-8 w-8 shrink-0" />
+          <span className="text-sm font-extrabold tracking-tight text-navy-800 dark:text-white">Simulateur de Portefeuille</span>
         </Link>
         <button
           onClick={onToggleTheme}

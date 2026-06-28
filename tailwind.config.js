@@ -36,6 +36,12 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
+      // Élévations en couches (premium) — remplacent les ombres plates
+      boxShadow: {
+        card: '0 1px 2px rgba(13,27,46,0.04), 0 6px 20px -8px rgba(13,27,46,0.10)',
+        'card-hover': '0 8px 24px -8px rgba(13,27,46,0.18), 0 2px 6px rgba(13,27,46,0.06)',
+        float: '0 24px 48px -16px rgba(13,27,46,0.40), 0 8px 16px -8px rgba(13,27,46,0.30)',
+      },
       keyframes: {
         'fade-in': {
           '0%': { opacity: '0', transform: 'translateY(8px)' },
