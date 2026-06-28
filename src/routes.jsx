@@ -7,6 +7,7 @@ import { Navigate } from 'react-router-dom'
 import RootLayout from './layouts/RootLayout'
 import Home from './pages/Home'
 import SimulatorPage from './pages/SimulatorPage'
+import BeginnerSimulatorPage from './pages/BeginnerSimulatorPage'
 import ComparatorPage from './pages/ComparatorPage'
 import RetirementPage from './pages/RetirementPage'
 import MonteCarloPage from './pages/MonteCarloPage'
@@ -21,6 +22,7 @@ export const routes = [
     element: <RootLayout />,
     children: [
       { index: true, element: <Home /> },
+      { path: 'simulateur-debutant', element: <BeginnerSimulatorPage /> },
       { path: 'simulateur', element: <SimulatorPage /> },
       { path: 'comparateur', element: <ComparatorPage /> },
       { path: 'retraite', element: <RetirementPage /> },

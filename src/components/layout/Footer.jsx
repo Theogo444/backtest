@@ -41,7 +41,8 @@ export default function Footer({ source, updatedAt }) {
           <ul className="space-y-1">
             {[
               ['/', 'Accueil'],
-              ['/simulateur', 'Simulateur'],
+              ['/simulateur-debutant', 'Simulateur débutant'],
+              ['/simulateur', 'Simulateur avancé'],
               ['/comparateur', 'Comparateur d\'enveloppes'],
               ['/retraite', 'Objectif retraite'],
               ['/monte-carlo', 'Monte Carlo'],

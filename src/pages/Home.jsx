@@ -6,7 +6,7 @@
 import { Head } from 'vite-react-ssg'
 import { Link } from 'react-router-dom'
 import {
-  LineChart, Scale, Landmark, Dices, ArrowRight, ShieldCheck,
+  Rocket, LineChart, Scale, Landmark, Dices, ArrowRight, ShieldCheck,
   PiggyBank, Wallet, Star, TrendingUp, Clock,
 } from 'lucide-react'
 import AdSlot from '../components/layout/AdSlot'
@@ -35,7 +35,8 @@ const ENVELOPES = [
 ]
 
 const TOOLS = [
-  { to: '/simulateur', icon: LineChart, name: 'Simulateur', desc: 'Backtestez 8 stratégies sur vos actifs.' },
+  { to: '/simulateur-debutant', icon: Rocket, name: 'Simulateur débutant', desc: 'Courtier, enveloppe et plan : résultat clair en un clic.' },
+  { to: '/simulateur', icon: LineChart, name: 'Simulateur avancé', desc: 'Backtestez 8 stratégies sur vos actifs.' },
   { to: '/comparateur', icon: Scale, name: 'Comparateur d\'enveloppes', desc: 'PEA vs CTO vs Assurance-vie.' },
   { to: '/retraite', icon: Landmark, name: 'Objectif retraite', desc: 'Quel effort mensuel pour votre capital ?' },
   { to: '/monte-carlo', icon: Dices, name: 'Monte Carlo', desc: 'Vos chances d\'atteindre l\'objectif.' },
@@ -67,8 +68,8 @@ export default function Home() {
             espérer ? Testez tout avec des données de marché réelles avant d'investir un seul euro.
           </p>
           <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link to="/simulateur" className="btn-primary bg-white !text-navy-900 hover:bg-navy-50">
-              Simuler mon portefeuille <ArrowRight size={16} />
+            <Link to="/simulateur-debutant" className="btn-primary bg-white !text-navy-900 hover:bg-navy-50">
+              Simuler mon investissement <ArrowRight size={16} />
             </Link>
             <Link to="/comparateur" className="btn-secondary border-white/30 bg-white/10 !text-white hover:bg-white/20">
               Comparer les enveloppes
@@ -124,7 +125,7 @@ export default function Home() {
         <p className="mt-1 text-sm text-navy-500">
           Des simulations basées sur ~25 ans de données de marché réelles.
         </p>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {TOOLS.map((t) => {
             const Icon = t.icon
             return (

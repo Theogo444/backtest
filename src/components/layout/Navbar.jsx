@@ -4,11 +4,12 @@
 // ============================================================================
 
 import { NavLink, Link } from 'react-router-dom'
-import { Home, LineChart, Scale, Landmark, Dices, Newspaper, BookOpen, Moon, Sun, TrendingUp } from 'lucide-react'
+import { Home, Rocket, LineChart, Scale, Landmark, Dices, Newspaper, BookOpen, Moon, Sun, TrendingUp } from 'lucide-react'
 
 export const NAV_ITEMS = [
   { to: '/', label: 'Accueil', icon: Home, end: true },
-  { to: '/simulateur', label: 'Simulateur', icon: LineChart },
+  { to: '/simulateur-debutant', label: 'Débutant', icon: Rocket },
+  { to: '/simulateur', label: 'Avancé', icon: LineChart },
   { to: '/comparateur', label: 'Enveloppes', icon: Scale },
   { to: '/retraite', label: 'Retraite', icon: Landmark },
   { to: '/monte-carlo', label: 'Monte Carlo', icon: Dices },
@@ -79,8 +80,8 @@ export default function Navbar({ theme, onToggleTheme }) {
         </button>
       </header>
 
-      {/* ---------- Bottom nav mobile ---------- */}
-      <nav className="fixed bottom-0 left-0 right-0 z-30 flex border-t border-navy-100 bg-white md:hidden dark:border-navy-800 dark:bg-navy-900">
+      {/* ---------- Bottom nav mobile (défilement horizontal) ---------- */}
+      <nav className="fixed bottom-0 left-0 right-0 z-30 flex overflow-x-auto border-t border-navy-100 bg-white md:hidden dark:border-navy-800 dark:bg-navy-900 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon
           return (
@@ -89,7 +90,7 @@ export default function Navbar({ theme, onToggleTheme }) {
               to={item.to}
               end={item.end}
               className={({ isActive }) =>
-                `flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-semibold transition ${
+                `flex min-w-[4.25rem] shrink-0 flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-semibold transition ${
                   isActive ? 'text-navy-800 dark:text-white' : 'text-navy-400'
                 }`
               }

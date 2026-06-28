@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { AlertCircle } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import AssetSearch from './AssetSearch'
 import StrategySelector from './StrategySelector'
 import ParametersPanel from './ParametersPanel'
@@ -21,10 +22,15 @@ export default function Simulator({ config, updateConfig, marketData }) {
     <section>
       <header className="mb-5">
         <h1 className="text-2xl font-extrabold text-navy-800 dark:text-white md:text-3xl">
-          Simulateur de portefeuille
+          Simulateur avancé
         </h1>
         <p className="mt-1 text-sm text-navy-500 dark:text-navy-400">
-          Backtestez votre stratégie d'investissement sur des données historiques.
+          Backtestez votre stratégie d'investissement sur données historiques (8 stratégies, frais,
+          inflation, benchmark). Débutant ?{' '}
+          <Link to="/simulateur-debutant" className="font-semibold text-navy-700 underline dark:text-navy-200">
+            Essayez le simulateur guidé
+          </Link>
+          .
           {source === 'demo' && (
             <span className="ml-1 rounded bg-navy-100 px-1.5 py-0.5 text-xs font-semibold text-navy-500 dark:bg-navy-800">
               données de démonstration
