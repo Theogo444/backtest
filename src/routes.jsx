@@ -3,7 +3,6 @@
 //  Chaque chemin statique est pré-rendu en HTML au build.
 // ============================================================================
 
-import { Navigate } from 'react-router-dom'
 import RootLayout from './layouts/RootLayout'
 import Home from './pages/Home'
 import SimulatorPage from './pages/SimulatorPage'
@@ -14,6 +13,7 @@ import MonteCarloPage from './pages/MonteCarloPage'
 import GlossaryPage from './pages/GlossaryPage'
 import GuidesIndex from './pages/GuidesIndex'
 import GuideArticle from './pages/GuideArticle'
+import NotFound from './pages/NotFound'
 import { GUIDE_SLUGS } from './data/guides'
 
 export const routes = [
@@ -36,8 +36,11 @@ export const routes = [
         // getStaticPaths attend les chemins COMPLETS, pas seulement le slug.
         getStaticPaths: () => GUIDE_SLUGS.map((slug) => `/guides/${slug}`),
       },
-      // Toute URL inconnue renvoie vers l'accueil (côté client uniquement).
-      { path: '*', element: <Navigate to="/" replace /> },
+      // Page 404 pré-rendue (dist/404.html). Vercel la sert avec un statut HTTP
+      // 404 réel pour toute URL inconnue (cf. vercel.json sans fallback SPA).
+      { path: '404', element: <NotFound /> },
+      // Catch-all client : affiche la même 404 (pas de redirection vers l'accueil).
+      { path: '*', element: <NotFound /> },
     ],
   },
 ]
