@@ -6,6 +6,7 @@
   "description": "Simulateur et backtest de portefeuille d'investissement pour particuliers français (PEA, CTO, Assurance-vie).",
   "scripts": {
     "dev": "vite",
+    "pdf": "node scripts/generate-pea-pdf.mjs",
     "sitemap": "node scripts/generate-sitemap.mjs",
     "build": "node scripts/generate-sitemap.mjs && vite-react-ssg build",
     "preview": "vite preview"
@@ -22,6 +23,7 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
+    "pdf-lib": "^1.17.1",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
     "vite": "^5.4.11"
