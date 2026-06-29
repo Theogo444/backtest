@@ -236,6 +236,8 @@ export default function BeginnerSimulator({ marketData }) {
         />
         <div className="rounded-3xl bg-navy-100/50 p-3 ring-1 ring-navy-100 dark:bg-navy-900/40 dark:ring-navy-800 sm:p-4">
           <div className="grid gap-3 lg:grid-cols-2 lg:items-start">
+            {/* ---- Colonne gauche : préparer le terrain (étapes 1 → 3) ---- */}
+            <div className="space-y-3">
             {/* Étape 1 — Courtier (menu déroulant) */}
             <div className="card">
               <StepTitle n={1} title="Choisissez votre courtier" />
@@ -343,7 +345,10 @@ export default function BeginnerSimulator({ marketData }) {
                 </p>
               )}
             </div>
+            </div>
 
+            {/* ---- Colonne droite : votre plan d'investissement (étape 4) ---- */}
+            <div className="space-y-3">
             {/* Étape 4 — Montant & plan */}
             <div className="card">
               <StepTitle n={4} title="Combien et comment ?" />
@@ -413,17 +418,18 @@ export default function BeginnerSimulator({ marketData }) {
                 La simulation s'appuie sur les {period.replace('y', '')} dernières années de marché réelles.
               </p>
             </div>
-          </div>
 
-          {/* Invitation : recevoir le comparatif par email (pleine largeur) */}
-          <EmailCapture
-            variant="compact"
-            source="simulator_beginner_broker"
-            leadMagnet="le comparatif PEA 2026"
-            title="Recevez le comparatif des courtiers (PDF)"
-            subtitle="Frais, ETF et pièges à éviter pour bien choisir votre courtier."
-            className="mt-3"
-          />
+            {/* Invitation : recevoir le comparatif par email */}
+            <EmailCapture
+              variant="compact"
+              dense
+              source="simulator_beginner_broker"
+              leadMagnet="le comparatif PEA 2026"
+              title="Recevez le comparatif des courtiers (PDF)"
+              subtitle="Frais, ETF et pièges à éviter pour bien choisir votre courtier."
+            />
+            </div>
+          </div>
         </div>
       </div>
 
