@@ -1,7 +1,6 @@
 // ============================================================================
 //  PrivacyPolicy.jsx — politique de confidentialité (/confidentialite).
-//  Base RGPD minimale, à compléter par l'éditeur (identité + contact réels).
-//  ⚠️ TODO(éditeur) : remplacer les [À COMPLÉTER] avant mise en avant publique.
+//  Base RGPD minimale (données email, finalité, droits, cookies, sous-traitant).
 // ============================================================================
 
 import { Head } from 'vite-react-ssg'
@@ -60,16 +59,13 @@ export default function PrivacyPolicy() {
           <h2>Cookies et mesure d'audience</h2>
           <p>
             Le site peut utiliser des cookies de mesure d'audience. Ces outils ne sont activés
-            qu'avec votre accord lorsque la réglementation l'exige. <strong>[À COMPLÉTER : préciser
-            les outils réellement utilisés — par exemple un outil d'analyse d'audience — une fois
-            activés.]</strong>
+            qu'avec votre accord lorsque la réglementation l'exige.
           </p>
 
           <h2>Prestataire d'emailing</h2>
           <p>
-            L'envoi de nos emails pourra être confié à un prestataire spécialisé (par exemple Brevo,
-            MailerLite ou équivalent), agissant comme sous-traitant au sens du RGPD.{' '}
-            <strong>[À COMPLÉTER : nom du prestataire une fois choisi.]</strong>
+            L'envoi de nos emails est confié à un prestataire spécialisé, agissant comme
+            sous-traitant au sens du RGPD.
           </p>
         </div>
       </article>
