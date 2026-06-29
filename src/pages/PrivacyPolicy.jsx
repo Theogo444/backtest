@@ -27,13 +27,6 @@ export default function PrivacyPolicy() {
         <p className="mt-2 text-sm text-navy-400">Dernière mise à jour : {UPDATED}</p>
 
         <div className="article-body mt-6">
-          <h2>Responsable du traitement</h2>
-          <p>
-            Le présent site « Simulateur de Portefeuille FR » est édité par{' '}
-            <strong>[À COMPLÉTER : nom de l'éditeur]</strong>. Pour toute question relative à vos
-            données, contactez <strong>[À COMPLÉTER : email de contact]</strong>.
-          </p>
-
           <h2>Données collectées</h2>
           <p>
             Les simulations se déroulent intégralement dans votre navigateur : aucune donnée de
@@ -60,8 +53,8 @@ export default function PrivacyPolicy() {
           <p>
             Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, d'effacement, de
             limitation et d'opposition concernant vos données. Vous pouvez vous désinscrire en un clic
-            via le lien présent dans chaque email, ou exercer vos droits en écrivant à l'adresse de
-            contact ci-dessus. Vous pouvez également introduire une réclamation auprès de la CNIL.
+            via le lien présent dans chaque email. Vous pouvez également introduire une réclamation
+            auprès de la CNIL.
           </p>
 
           <h2>Cookies et mesure d'audience</h2>
