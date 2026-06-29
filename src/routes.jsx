@@ -8,6 +8,7 @@ import Home from './pages/Home'
 import SimulatorPage from './pages/SimulatorPage'
 import BeginnerSimulatorPage from './pages/BeginnerSimulatorPage'
 import ComparatorPage from './pages/ComparatorPage'
+import BrokerComparatorPage from './pages/BrokerComparatorPage'
 import RetirementPage from './pages/RetirementPage'
 import MonteCarloPage from './pages/MonteCarloPage'
 import GlossaryPage from './pages/GlossaryPage'
@@ -26,6 +27,7 @@ export const routes = [
       { path: 'simulateur-debutant', element: <BeginnerSimulatorPage /> },
       { path: 'simulateur', element: <SimulatorPage /> },
       { path: 'comparateur', element: <ComparatorPage /> },
+      { path: 'comparatif-courtiers', element: <BrokerComparatorPage /> },
       { path: 'retraite', element: <RetirementPage /> },
       { path: 'monte-carlo', element: <MonteCarloPage /> },
       { path: 'glossaire', element: <GlossaryPage /> },

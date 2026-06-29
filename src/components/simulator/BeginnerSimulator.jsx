@@ -3,18 +3,23 @@
 //  Parcours en étapes : courtier → enveloppe → actifs → montant & plan →
 //  résultat clair, avec graphique simple et phrase de synthèse.
 //
+//  Mise en page « 2 zones » explicite : à gauche VOS CHOIX (formulaire groupé
+//  sur fond teinté), à droite VOTRE RÉSULTAT. Le courtier se choisit dans un
+//  menu déroulant et renvoie vers le comparatif complet. Une aide calcule un
+//  montant mensuel à partir des revenus.
+//
 //  Réutilise le moteur du simulateur avancé (useSimulation) et le calcul fiscal
 //  (compareEnvelopes). Les frais du courtier choisi alimentent le moteur.
 // ============================================================================
 
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer,
 } from 'recharts'
 import {
   Rocket, Coins, CalendarClock, TrendingDown, PiggyBank, Wallet, Landmark,
-  Check, ArrowRight, Info, Star, AlertTriangle, Sparkles,
+  Check, ArrowRight, Info, AlertTriangle, Sparkles, Calculator, ChevronDown,
 } from 'lucide-react'
 import AssetSearch from './AssetSearch'
 import ShareResult from '../marketing/ShareResult'
@@ -156,10 +161,13 @@ export default function BeginnerSimulator({ marketData }) {
     const comp = compareEnvelopes({ finalValue, invested: totalInvested, years, ctoMethod: 'pfu' })
     const env = comp.envelopes.find((e) => e.id === envelope) || comp.envelopes[0]
     const netGain = env.netFinal - totalInvested
+    const grossGain = finalValue - totalInvested
     return {
       years, totalInvested,
       grossFinal: finalValue,
+      grossGain,
       tax: env.tax,
+      taxRate: grossGain > 0 ? env.tax / grossGain : 0,
       netFinal: env.netFinal,
       netGain,
       multiple: totalInvested > 0 ? env.netFinal / totalInvested : 0,
@@ -178,6 +186,12 @@ export default function BeginnerSimulator({ marketData }) {
   }, [result])
 
   const picks = plan.kind === 'monthly' ? MONTHLY_PICKS : ONEOFF_PICKS
+
+  // Applique un montant mensuel suggéré (bascule sur le plan DCA).
+  const applyMonthlyAmount = (v) => {
+    setPlanId('dca')
+    setAmount(v)
+  }
 
   // Lien partageable + carte PNG (reflètent les choix courants).
   const shareUrl = buildShareUrl(
@@ -206,175 +220,227 @@ export default function BeginnerSimulator({ marketData }) {
           <Rocket size={26} /> Simulateur débutant
         </h1>
         <p className="mt-1 text-sm text-navy-500 dark:text-navy-400">
-          En 4 étapes simples, voyez ce que votre épargne aurait pu devenir. Choisissez, et le
-          résultat s'actualise tout seul.
+          En 4 étapes simples, voyez ce que votre épargne aurait pu devenir. Choisissez à gauche, votre
+          résultat s'actualise tout seul à droite.
         </p>
       </header>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        {/* ----------------------- Colonne configuration ----------------------- */}
-        <div className="space-y-4 lg:col-span-1">
-          {/* Étape 1 — Courtier */}
-          <div className="card">
-            <StepTitle n={1} title="Choisissez votre courtier" />
-            <p className="mb-3 text-xs text-navy-400">
-              C'est l'intermédiaire chez qui vous ouvrez votre compte. Ses frais réduisent vos gains.
-            </p>
-            <div className="space-y-2">
-              {BROKERS.map((b) => (
-                <BrokerOption
-                  key={b.id}
-                  broker={b}
-                  selected={b.id === brokerId}
-                  onSelect={() => setBrokerId(b.id)}
-                />
-              ))}
-            </div>
-            <p className="mt-2 text-[11px] text-navy-400">
-              Frais indicatifs ({FEES_AS_OF}), à vérifier sur le site du courtier.
-            </p>
-          </div>
-
-          {/* Étape 2 — Enveloppe */}
-          <div className="card">
-            <StepTitle n={2} title="Choisissez votre enveloppe" />
-            <p className="mb-3 text-xs text-navy-400">
-              Le « compte » fiscal dans lequel vous investissez. Il détermine vos impôts à la sortie.
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              {['pea', 'cto', 'av'].map((env) => {
-                const available = broker.accounts.includes(env)
-                const Icon = ENVELOPE_INFO[env].icon
-                const active = envelope === env
-                return (
-                  <button
-                    key={env}
-                    disabled={!available}
-                    onClick={() => setEnvelope(env)}
-                    className={`flex flex-col items-center gap-1 rounded-lg border px-2 py-2.5 text-center transition ${
-                      active
-                        ? 'border-navy-800 bg-navy-800 text-white'
-                        : available
-                          ? 'border-navy-200 text-navy-600 hover:border-navy-400 dark:border-navy-700 dark:text-navy-300'
-                          : 'cursor-not-allowed border-navy-100 text-navy-300 opacity-50 dark:border-navy-800'
-                    }`}
-                    title={available ? '' : `${broker.name} ne propose pas cette enveloppe`}
-                  >
-                    <Icon size={18} />
-                    <span className="text-xs font-bold">{ENVELOPE_INFO[env].label}</span>
-                  </button>
-                )
-              })}
-            </div>
-            <p className="mt-2 flex items-start gap-1.5 text-[11px] leading-snug text-navy-500 dark:text-navy-400">
-              <Info size={13} className="mt-0.5 shrink-0" /> {ENVELOPE_INFO[envelope].tip}
-            </p>
-          </div>
-
-          {/* Étape 3 — Actifs */}
-          <div>
-            <StepTitle n={3} title="Dans quoi investissez-vous ?" className="mb-2 px-1" />
-            <AssetSearch
-              allAssets={assets}
-              selectedAssets={selectedAssets}
-              onChange={setSelectedAssets}
-              autoRebalance={autoRebalance}
-              onToggleRebalance={setAutoRebalance}
-            />
-            <p className="mt-2 flex items-start gap-1.5 px-1 text-[11px] leading-snug text-navy-500 dark:text-navy-400">
-              <Sparkles size={13} className="mt-0.5 shrink-0" />
-              Pas sûr ? Un <strong className="mx-1 font-semibold">ETF Monde (MSCI World)</strong> est
-              le grand classique pour débuter : il investit dans plus de 1 500 entreprises mondiales.
-            </p>
-            {ineligible.length > 0 && (
-              <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-amber-50 px-2.5 py-2 text-[11px] leading-snug text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
-                <AlertTriangle size={13} className="mt-0.5 shrink-0" />
-                {ineligible.map((a) => a.name).join(', ')} n'{ineligible.length > 1 ? 'sont' : 'est'} pas
-                éligible{ineligible.length > 1 ? 's' : ''} au {ENVELOPE_LABELS[envelope]}. Le résultat
-                reste indicatif.
+      <div className="grid gap-5 lg:grid-cols-5">
+        {/* ============================ VOS CHOIX ============================ */}
+        <div className="lg:col-span-2">
+          <ZoneHeader
+            kicker="Vos choix"
+            title="Configurez votre simulation"
+            hint="Renseignez les 4 étapes ci-dessous. Votre résultat apparaît à droite (plus bas sur mobile)."
+            tone="form"
+          />
+          <div className="space-y-3 rounded-3xl bg-navy-100/50 p-3 ring-1 ring-navy-100 dark:bg-navy-900/40 dark:ring-navy-800 sm:p-4">
+            {/* Étape 1 — Courtier (menu déroulant) */}
+            <div className="card">
+              <StepTitle n={1} title="Choisissez votre courtier" />
+              <p className="mb-2 text-xs text-navy-400">
+                C'est l'intermédiaire chez qui vous ouvrez votre compte. Ses frais réduisent vos gains.
               </p>
-            )}
-          </div>
-
-          {/* Étape 4 — Montant & plan */}
-          <div className="card">
-            <StepTitle n={4} title="Combien et comment ?" />
-
-            <label className="label mt-1">{plan.amountLabel}</label>
-            <div className="flex items-center gap-2">
-              <div className="flex flex-1 items-center rounded-lg border border-navy-200 bg-white px-3 py-2 focus-within:border-navy-500 dark:border-navy-700 dark:bg-navy-800">
-                <input
-                  type="number" min="0" step="10"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full bg-transparent text-lg font-bold tabular-nums outline-none"
-                />
-                <span className="text-sm font-semibold text-navy-400">
-                  {plan.kind === 'monthly' ? '€/mois' : '€'}
-                </span>
+              <label htmlFor="broker-select" className="sr-only">Courtier</label>
+              <div className="relative">
+                <select
+                  id="broker-select"
+                  value={brokerId}
+                  onChange={(e) => setBrokerId(e.target.value)}
+                  className="field appearance-none pr-9 font-semibold"
+                >
+                  {BROKERS.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name} · {b.accounts.map((a) => ENVELOPE_LABELS[a]).join(' / ')}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-navy-400" />
               </div>
-            </div>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {picks.map((v) => (
-                <button
-                  key={v}
-                  onClick={() => setAmount(v)}
-                  className={`rounded-full border px-2.5 py-1 text-xs font-semibold transition ${
-                    Number(amount) === v
-                      ? 'border-navy-800 bg-navy-800 text-white'
-                      : 'border-navy-200 text-navy-600 hover:border-navy-400 dark:border-navy-700 dark:text-navy-300'
-                  }`}
-                >
-                  {formatEUR(v)}
-                </button>
-              ))}
+
+              {/* Récap du courtier choisi */}
+              <div className="mt-3 rounded-lg bg-navy-50/70 p-3 ring-1 ring-navy-100 dark:bg-navy-800/50 dark:ring-navy-800">
+                <div className="flex flex-wrap items-center gap-1">
+                  {broker.accounts.map((a) => (
+                    <span key={a} className="rounded bg-navy-100 px-1.5 py-0.5 text-[10px] font-bold text-navy-600 dark:bg-navy-700 dark:text-navy-200">
+                      {ENVELOPE_LABELS[a]}
+                    </span>
+                  ))}
+                  <span className="ml-auto text-[11px] font-semibold text-navy-400">{broker.bestFor}</span>
+                </div>
+                <div className="mt-1.5 text-xs font-semibold text-navy-700 dark:text-navy-200">{broker.feeSummary}</div>
+              </div>
+
+              <Link
+                to="/comparatif-courtiers"
+                className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-navy-600 hover:underline dark:text-navy-300"
+              >
+                Voir le comparatif complet des 9 courtiers <ArrowRight size={13} />
+              </Link>
+              <p className="mt-2 text-[11px] text-navy-400">
+                Frais indicatifs ({FEES_AS_OF}), à vérifier sur le site du courtier.
+              </p>
             </div>
 
-            <label className="label mt-4">Votre plan d'investissement</label>
-            <div className="space-y-2">
-              {PLANS.map((p) => (
-                <PlanOption
-                  key={p.id}
-                  plan={p}
-                  selected={p.id === planId}
-                  onSelect={() => setPlanId(p.id)}
-                />
-              ))}
+            {/* Invitation : recevoir le comparatif par email */}
+            <EmailCapture
+              variant="compact"
+              source="simulator_beginner_broker"
+              leadMagnet="le comparatif PEA 2026"
+              title="Recevez le comparatif des courtiers (PDF)"
+              subtitle="Frais, ETF et pièges à éviter pour bien choisir."
+            />
+
+            {/* Étape 2 — Enveloppe */}
+            <div className="card">
+              <StepTitle n={2} title="Choisissez votre enveloppe" />
+              <p className="mb-3 text-xs text-navy-400">
+                Le « compte » fiscal dans lequel vous investissez. Il détermine vos impôts à la sortie.
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                {['pea', 'cto', 'av'].map((env) => {
+                  const available = broker.accounts.includes(env)
+                  const Icon = ENVELOPE_INFO[env].icon
+                  const active = envelope === env
+                  return (
+                    <button
+                      key={env}
+                      disabled={!available}
+                      onClick={() => setEnvelope(env)}
+                      className={`flex flex-col items-center gap-1 rounded-lg border px-2 py-2.5 text-center transition ${
+                        active
+                          ? 'border-navy-800 bg-navy-800 text-white'
+                          : available
+                            ? 'border-navy-200 text-navy-600 hover:border-navy-400 dark:border-navy-700 dark:text-navy-300'
+                            : 'cursor-not-allowed border-navy-100 text-navy-300 opacity-50 dark:border-navy-800'
+                      }`}
+                      title={available ? '' : `${broker.name} ne propose pas cette enveloppe`}
+                    >
+                      <Icon size={18} />
+                      <span className="text-xs font-bold">{ENVELOPE_INFO[env].label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="mt-2 flex items-start gap-1.5 text-[11px] leading-snug text-navy-500 dark:text-navy-400">
+                <Info size={13} className="mt-0.5 shrink-0" /> {ENVELOPE_INFO[envelope].tip}
+              </p>
             </div>
 
-            <label className="label mt-4">Pendant combien de temps ?</label>
-            <div className="grid grid-cols-3 gap-2">
-              {DURATIONS.map((d) => (
-                <button
-                  key={d.id}
-                  onClick={() => setPeriod(d.id)}
-                  className={`rounded-lg border px-2 py-2 text-sm font-semibold transition ${
-                    period === d.id
-                      ? 'border-navy-800 bg-navy-800 text-white'
-                      : 'border-navy-200 text-navy-600 hover:border-navy-400 dark:border-navy-700 dark:text-navy-300'
-                  }`}
-                >
-                  {d.label}
-                </button>
-              ))}
+            {/* Étape 3 — Actifs */}
+            <div>
+              <StepTitle n={3} title="Dans quoi investissez-vous ?" className="mb-2 px-1" />
+              <AssetSearch
+                allAssets={assets}
+                selectedAssets={selectedAssets}
+                onChange={setSelectedAssets}
+                autoRebalance={autoRebalance}
+                onToggleRebalance={setAutoRebalance}
+              />
+              <p className="mt-2 flex items-start gap-1.5 px-1 text-[11px] leading-snug text-navy-500 dark:text-navy-400">
+                <Sparkles size={13} className="mt-0.5 shrink-0" />
+                Pas sûr ? Un <strong className="mx-1 font-semibold">ETF Monde (MSCI World)</strong> est
+                le grand classique pour débuter : il investit dans plus de 1 500 entreprises mondiales.
+              </p>
+              {ineligible.length > 0 && (
+                <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-amber-50 px-2.5 py-2 text-[11px] leading-snug text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+                  <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+                  {ineligible.map((a) => a.name).join(', ')} n'{ineligible.length > 1 ? 'sont' : 'est'} pas
+                  éligible{ineligible.length > 1 ? 's' : ''} au {ENVELOPE_LABELS[envelope]}. Le résultat
+                  reste indicatif.
+                </p>
+              )}
             </div>
-            <p className="mt-2 text-[11px] text-navy-400">
-              La simulation s'appuie sur les {period.replace('y', '')} dernières années de marché réelles.
-            </p>
+
+            {/* Étape 4 — Montant & plan */}
+            <div className="card">
+              <StepTitle n={4} title="Combien et comment ?" />
+
+              {/* Aide : combien investir chaque mois ? */}
+              <MonthlyAmountHelper onApply={applyMonthlyAmount} />
+
+              <label className="label mt-4">{plan.amountLabel}</label>
+              <div className="flex items-center gap-2">
+                <div className="flex flex-1 items-center rounded-lg border border-navy-200 bg-white px-3 py-2 focus-within:border-navy-500 dark:border-navy-700 dark:bg-navy-800">
+                  <input
+                    type="number" min="0" step="10"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    className="w-full bg-transparent text-lg font-bold tabular-nums outline-none"
+                  />
+                  <span className="text-sm font-semibold text-navy-400">
+                    {plan.kind === 'monthly' ? '€/mois' : '€'}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {picks.map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => setAmount(v)}
+                    className={`rounded-full border px-2.5 py-1 text-xs font-semibold transition ${
+                      Number(amount) === v
+                        ? 'border-navy-800 bg-navy-800 text-white'
+                        : 'border-navy-200 text-navy-600 hover:border-navy-400 dark:border-navy-700 dark:text-navy-300'
+                    }`}
+                  >
+                    {formatEUR(v)}
+                  </button>
+                ))}
+              </div>
+
+              <label className="label mt-4">Votre plan d'investissement</label>
+              <div className="space-y-2">
+                {PLANS.map((p) => (
+                  <PlanOption
+                    key={p.id}
+                    plan={p}
+                    selected={p.id === planId}
+                    onSelect={() => setPlanId(p.id)}
+                  />
+                ))}
+              </div>
+
+              <label className="label mt-4">Pendant combien de temps ?</label>
+              <div className="grid grid-cols-3 gap-2">
+                {DURATIONS.map((d) => (
+                  <button
+                    key={d.id}
+                    onClick={() => setPeriod(d.id)}
+                    className={`rounded-lg border px-2 py-2 text-sm font-semibold transition ${
+                      period === d.id
+                        ? 'border-navy-800 bg-navy-800 text-white'
+                        : 'border-navy-200 text-navy-600 hover:border-navy-400 dark:border-navy-700 dark:text-navy-300'
+                    }`}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-[11px] text-navy-400">
+                La simulation s'appuie sur les {period.replace('y', '')} dernières années de marché réelles.
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* ----------------------- Colonne résultat ----------------------- */}
-        <div className="space-y-4 lg:col-span-2">
+        {/* ============================ VOTRE RÉSULTAT ============================ */}
+        <div className="lg:col-span-3">
+          <ZoneHeader
+            kicker="Votre résultat"
+            title="Ce que votre épargne aurait donné"
+            hint="Actualisé automatiquement à chaque changement, frais et impôts déduits."
+            tone="result"
+          />
           {loading ? (
             <div className="card h-64 animate-pulse" />
           ) : !summary ? (
             <div className="card flex items-start gap-3 text-sm text-navy-500">
               <Info size={18} className="mt-0.5 shrink-0 text-navy-400" />
-              <p>Sélectionnez au moins un actif pour voir le résultat.</p>
+              <p>Sélectionnez au moins un actif (étape 3) pour voir le résultat.</p>
             </div>
           ) : (
-            <>
+            <div className="space-y-4">
               <ResultPanel
                 broker={broker}
                 envelope={envelope}
@@ -401,7 +467,7 @@ export default function BeginnerSimulator({ marketData }) {
                 title="Recevez le comparatif PEA 2026"
                 subtitle="Le bon courtier, les bons ETF et les frais à éviter — pour bien démarrer."
               />
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -412,45 +478,141 @@ export default function BeginnerSimulator({ marketData }) {
 // ---------------------------------------------------------------------------
 //  Sous-composants
 // ---------------------------------------------------------------------------
+function ZoneHeader({ kicker, title, hint, tone }) {
+  const dot = tone === 'result' ? 'bg-gain' : 'bg-navy-800'
+  return (
+    <div className="mb-3">
+      <div className="flex items-center gap-2">
+        <span className={`h-2.5 w-2.5 rounded-full ${dot}`} />
+        <span className="text-xs font-bold uppercase tracking-[0.08em] text-navy-500 dark:text-navy-300">{kicker}</span>
+      </div>
+      <h2 className="mt-1 text-lg font-extrabold text-navy-800 dark:text-white">{title}</h2>
+      <p className="mt-0.5 text-xs text-navy-400">{hint}</p>
+    </div>
+  )
+}
+
 function StepTitle({ n, title, className = 'mb-3' }) {
   return (
-    <h2 className={`flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-navy-700 dark:text-navy-200 ${className}`}>
+    <h3 className={`flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-navy-700 dark:text-navy-200 ${className}`}>
       <span className="flex h-5 w-5 items-center justify-center rounded-full bg-navy-800 text-[11px] font-bold text-white">
         {n}
       </span>
       {title}
-    </h2>
+    </h3>
   )
 }
 
-function BrokerOption({ broker, selected, onSelect }) {
+// Aide repliable : propose un montant mensuel à partir des revenus.
+function MonthlyAmountHelper({ onApply }) {
+  const [open, setOpen] = useState(false)
+  const [income, setIncome] = useState('')
+  const [future, setFuture] = useState('')
+  const [rate, setRate] = useState(10)
+
+  const round10 = (n) => Math.max(10, Math.round(n / 10) * 10)
+  const inc = Number(income) || 0
+  const fut = Number(future) || 0
+  const suggested = inc > 0 ? round10((inc * rate) / 100) : 0
+  const suggestedFuture = fut > 0 ? round10((fut * rate) / 100) : 0
+
+  const RATES = [
+    { v: 5, label: 'Prudent' },
+    { v: 10, label: 'Équilibré' },
+    { v: 20, label: 'Ambitieux' },
+  ]
+
   return (
-    <button
-      onClick={onSelect}
-      className={`w-full rounded-lg border p-2.5 text-left transition ${
-        selected
-          ? 'border-navy-800 bg-navy-50 ring-1 ring-navy-800 dark:bg-navy-800/60'
-          : 'border-navy-200 hover:border-navy-400 dark:border-navy-700'
-      }`}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <span className="flex items-center gap-1.5">
-          <span className="text-sm font-bold text-navy-800 dark:text-white">{broker.name}</span>
-          {selected && <Check size={14} className="text-gain" />}
+    <div className="rounded-xl border border-dashed border-navy-300 p-3 dark:border-navy-700">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-2 text-left"
+      >
+        <span className="flex items-center gap-2 text-sm font-bold text-navy-700 dark:text-navy-200">
+          <Calculator size={15} /> Pas sûr du montant ? Calculez-le
         </span>
-        <span className="flex items-center gap-0.5 text-[11px] font-bold text-amber-500">
-          <Star size={11} fill="currentColor" /> {broker.rating.toFixed(1)}
-        </span>
-      </div>
-      <div className="mt-0.5 flex flex-wrap items-center gap-1">
-        {broker.accounts.map((a) => (
-          <span key={a} className="rounded bg-navy-100 px-1.5 py-0.5 text-[10px] font-bold text-navy-600 dark:bg-navy-700 dark:text-navy-200">
-            {ENVELOPE_LABELS[a]}
-          </span>
-        ))}
-      </div>
-      <div className="mt-1 text-[11px] text-navy-500 dark:text-navy-400">{broker.feeSummary}</div>
-    </button>
+        <ChevronDown size={16} className={`shrink-0 text-navy-400 transition ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="mt-3 space-y-3">
+          <div>
+            <label className="label">Votre revenu net mensuel</label>
+            <MoneyInput value={income} onChange={setIncome} placeholder="ex : 2 200" />
+          </div>
+
+          <div>
+            <label className="label">Quelle part épargner ?</label>
+            <div className="flex flex-wrap gap-1.5">
+              {RATES.map((r) => (
+                <button
+                  key={r.v}
+                  type="button"
+                  onClick={() => setRate(r.v)}
+                  className={`rounded-full border px-2.5 py-1 text-xs font-semibold transition ${
+                    rate === r.v
+                      ? 'border-navy-800 bg-navy-800 text-white'
+                      : 'border-navy-200 text-navy-600 hover:border-navy-400 dark:border-navy-700 dark:text-navy-300'
+                  }`}
+                >
+                  {r.label} · {r.v} %
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="label">Revenu net estimé dans 5 ans <span className="font-normal normal-case text-navy-400">(optionnel)</span></label>
+            <MoneyInput value={future} onChange={setFuture} placeholder="ex : 2 800" />
+          </div>
+
+          {suggested > 0 ? (
+            <div className="rounded-xl bg-gradient-to-br from-navy-800 to-navy-950 p-3 text-white">
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-navy-200">Montant suggéré</div>
+              <div className="text-2xl font-extrabold tabular-nums">
+                {formatEUR(suggested)}<span className="text-sm font-semibold text-navy-200"> /mois</span>
+              </div>
+              {suggestedFuture > 0 && (
+                <p className="mt-1 text-xs text-navy-200">
+                  Dans 5 ans, au même effort d'épargne&nbsp;: ~{formatEUR(suggestedFuture)}/mois.
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={() => onApply(suggested)}
+                className="btn-primary mt-2.5 bg-white !text-navy-900 hover:bg-navy-50"
+              >
+                Utiliser ce montant <ArrowRight size={15} />
+              </button>
+            </div>
+          ) : (
+            <p className="text-xs text-navy-400">Renseignez votre revenu pour obtenir une suggestion.</p>
+          )}
+
+          <p className="text-[11px] leading-snug text-navy-400">
+            Règle simple et indicative : n'investissez qu'une part de vos revenus dont vous n'aurez pas
+            besoin avant plusieurs années, et gardez toujours une épargne de précaution disponible.
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function MoneyInput({ value, onChange, placeholder }) {
+  return (
+    <div className="flex items-center rounded-lg border border-navy-200 bg-white px-3 py-2 focus-within:border-navy-500 dark:border-navy-700 dark:bg-navy-800">
+      <input
+        type="number" min="0" step="50"
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full bg-transparent text-sm font-semibold tabular-nums outline-none placeholder:font-normal placeholder:text-navy-400"
+      />
+      <span className="text-xs font-semibold text-navy-400">€/mois</span>
+    </div>
   )
 }
 
@@ -496,7 +658,7 @@ function ResultPanel({ broker, envelope, plan, amount, assetNames, summary, char
     <>
       {/* Phrase de synthèse */}
       <div className="card bg-gradient-to-br from-navy-800 to-navy-950 text-white ring-navy-800">
-        <div className="text-xs font-semibold uppercase tracking-wide text-navy-200">Votre résultat</div>
+        <div className="text-xs font-semibold uppercase tracking-wide text-navy-200">En résumé</div>
         <p className="mt-2 text-lg leading-relaxed md:text-xl">
           Avec <strong className="font-extrabold">{broker.name}</strong>, sur un{' '}
           <strong className="font-extrabold">{ENVELOPE_LABELS[envelope]}</strong>, en investissant{' '}
@@ -576,40 +738,40 @@ function ResultPanel({ broker, envelope, plan, amount, assetNames, summary, char
         </div>
       </div>
 
-      {/* Détail frais & impôt + rendement */}
+      {/* Récapitulatif : ce qui a été pris en compte */}
       <div className="card">
         <h3 className="mb-3 text-sm font-bold text-navy-700 dark:text-navy-200">Ce qui a été pris en compte</h3>
         <div className="space-y-2 text-sm">
-          <DetailRow label={`Frais du courtier (${broker.name})`} value={broker.feeSummary} />
+          <DetailRow label="Total investi" value={formatEUR(summary.totalInvested)} />
+          <DetailRow
+            label="Valeur finale (nette d'impôts)"
+            value={formatEUR(summary.netFinal)}
+            strong
+          />
+          <DetailRow
+            label="Plus-value nette"
+            value={`${positive ? '+' : ''}${formatEUR(summary.netGain, 0)}`}
+            tone={positive ? 'gain' : 'loss'}
+          />
           <DetailRow
             label={`Impôt à la sortie (${ENVELOPE_LABELS[envelope]})`}
-            value={summary.tax > 0 ? `− ${formatEUR(summary.tax)}` : 'aucun'}
+            value={
+              summary.tax > 0
+                ? `− ${formatEUR(summary.tax)} · ${formatPct(summary.taxRate)} de la plus-value`
+                : 'Aucun'
+            }
             tone={summary.tax > 0 ? 'loss' : 'gain'}
           />
           <DetailRow
-            label="Rendement annualisé (votre versement)"
+            label="Rendement annualisé"
             value={summary.cagr != null ? formatPct(summary.cagr, true) : '—'}
             tone={summary.cagr >= 0 ? 'gain' : 'loss'}
           />
+          <DetailRow label={`Frais du courtier (${broker.name})`} value={broker.feeSummary} />
         </div>
         <p className="mt-3 text-[11px] leading-snug text-navy-400">
           Les frais du courtier et l'impôt de l'enveloppe sont déjà déduits du résultat affiché.
           Performances passées sur données réelles : elles ne préjugent pas des performances futures.
-        </p>
-      </div>
-
-      {/* CTA affiliation */}
-      <div className="card border-l-4 border-l-navy-800 bg-navy-50/60 dark:bg-navy-900/60">
-        <div className="text-xs font-semibold uppercase tracking-wide text-navy-500">Passer à l'action</div>
-        <div className="mt-1 text-lg font-extrabold text-navy-800 dark:text-white">
-          Ouvrir un {ENVELOPE_LABELS[envelope]} chez {broker.name}
-        </div>
-        <p className="mt-1 text-sm text-navy-600 dark:text-navy-300">{broker.bestFor}.</p>
-        <a href={broker.url} rel="sponsored nofollow" className="btn-primary mt-3">
-          Ouvrir un compte <ArrowRight size={16} />
-        </a>
-        <p className="mt-2 text-[11px] text-navy-400">
-          Lien partenaire — sans surcoût pour vous. N'influence pas notre sélection.
         </p>
       </div>
     </>
@@ -627,12 +789,13 @@ function KeyStat({ label, value, tone }) {
   )
 }
 
-function DetailRow({ label, value, tone }) {
-  const color = tone === 'gain' ? 'text-gain' : tone === 'loss' ? 'text-loss' : 'text-navy-700 dark:text-navy-200'
+function DetailRow({ label, value, tone, strong }) {
+  const color =
+    tone === 'gain' ? 'text-gain' : tone === 'loss' ? 'text-loss' : 'text-navy-700 dark:text-navy-200'
   return (
     <div className="flex items-center justify-between gap-3 border-b border-navy-50 pb-2 last:border-0 dark:border-navy-800">
       <span className="text-navy-500 dark:text-navy-400">{label}</span>
-      <span className={`text-right font-semibold tabular-nums ${color}`}>{value}</span>
+      <span className={`text-right tabular-nums ${strong ? 'font-extrabold' : 'font-semibold'} ${color}`}>{value}</span>
     </div>
   )
 }

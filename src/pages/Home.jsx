@@ -9,7 +9,7 @@ import { Head } from 'vite-react-ssg'
 import { Link } from 'react-router-dom'
 import {
   Rocket, LineChart, Scale, Landmark, Dices, ArrowRight, ShieldCheck,
-  PiggyBank, Wallet, Star, Clock, Check, Database, BadgeCheck, Sparkles,
+  PiggyBank, Wallet, Clock, Check, Database, BadgeCheck, Sparkles,
 } from 'lucide-react'
 import EmailCapture from '../components/marketing/EmailCapture'
 import { BROKERS } from '../data/affiliates'
@@ -303,11 +303,6 @@ export default function Home() {
                   {b.envelope}
                 </span>
               </div>
-              <div className="mt-1 flex items-center gap-1 text-amber-500">
-                <Star size={14} fill="currentColor" />
-                <span className="text-xs font-bold text-navy-700 dark:text-navy-200">{b.rating.toFixed(1)}</span>
-                <span className="text-xs text-navy-400">/ 5</span>
-              </div>
               <p className="mt-2 text-sm font-semibold text-navy-700 dark:text-navy-200">{b.highlight}</p>
               <ul className="mt-2 flex-1 space-y-1 text-sm text-navy-600 dark:text-navy-300">
                 {b.pros.map((p) => (
@@ -326,6 +321,11 @@ export default function Home() {
               </a>
             </div>
           ))}
+        </div>
+        <div className="mt-5 text-center">
+          <Link to="/comparatif-courtiers" className="btn-secondary">
+            Comparer les 9 courtiers <ArrowRight size={16} />
+          </Link>
         </div>
         <p className="mt-3 text-center text-xs text-navy-400">
           Certains liens sont des partenariats : ouvrir un compte via ces liens peut nous rémunérer,

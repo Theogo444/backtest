@@ -4,7 +4,7 @@
 // ============================================================================
 
 import { NavLink, Link } from 'react-router-dom'
-import { Home, Rocket, LineChart, Scale, Landmark, Dices, Newspaper, BookOpen, Moon, Sun } from 'lucide-react'
+import { Home, Rocket, LineChart, Scale, Wallet, Landmark, Dices, Newspaper, BookOpen, Moon, Sun } from 'lucide-react'
 
 // Marque : courbe ascendante + nœud émeraude (cohérente avec le favicon).
 function BrandMark({ className = 'h-9 w-9' }) {
@@ -23,6 +23,7 @@ export const NAV_ITEMS = [
   { to: '/simulateur-debutant', label: 'Débutant', icon: Rocket },
   { to: '/simulateur', label: 'Avancé', icon: LineChart },
   { to: '/comparateur', label: 'Enveloppes', icon: Scale },
+  { to: '/comparatif-courtiers', label: 'Courtiers', icon: Wallet },
   { to: '/retraite', label: 'Retraite', icon: Landmark },
   { to: '/monte-carlo', label: 'Monte Carlo', icon: Dices },
   { to: '/guides', label: 'Guides', icon: Newspaper },

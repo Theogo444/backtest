@@ -21,6 +21,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://simulateur-portefeuille.fr/comparatif-courtiers</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://simulateur-portefeuille.fr/retraite</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
