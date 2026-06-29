@@ -285,10 +285,11 @@ export default function BeginnerSimulator({ marketData }) {
             {/* Invitation : recevoir le comparatif par email */}
             <EmailCapture
               variant="compact"
+              dense
               source="simulator_beginner_broker"
               leadMagnet="le comparatif PEA 2026"
-              title="Recevez le comparatif des courtiers (PDF)"
-              subtitle="Frais, ETF et pièges à éviter pour bien choisir."
+              title="Recevez le comparatif (PDF)"
+              subtitle="Frais, ETF et pièges à éviter pour bien choisir votre courtier."
             />
 
             {/* Étape 2 — Enveloppe */}

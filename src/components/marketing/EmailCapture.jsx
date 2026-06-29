@@ -30,6 +30,7 @@ export default function EmailCapture({
   leadMagnet = 'votre ressource',
   source = 'generic',
   variant = 'card',
+  dense = false, // compact : empile verticalement (pour les colonnes étroites)
   className = '',
 }) {
   const [email, setEmail] = useState('')
@@ -88,22 +89,22 @@ export default function EmailCapture({
   // ---------- Variante compacte (barre slim, rappel secondaire) ----------
   if (compact) {
     return (
-      <div className={`card flex flex-col gap-4 md:flex-row md:items-center md:justify-between ${className}`}>
+      <div className={`card flex flex-col gap-3 ${dense ? '' : 'md:flex-row md:items-center md:justify-between md:gap-4'} ${className}`}>
         <div className="flex items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy-100 text-navy-800 dark:bg-navy-800 dark:text-white">
             <Gift size={18} />
           </span>
-          <div>
-            <div className="text-sm font-extrabold text-navy-800 dark:text-white">{title}</div>
+          <div className="min-w-0">
+            <div className="text-sm font-extrabold leading-snug text-navy-800 dark:text-white">{title}</div>
             {subtitle && <p className="mt-0.5 text-xs text-navy-500 dark:text-navy-400">{subtitle}</p>}
           </div>
         </div>
 
-        <form onSubmit={onSubmit} className="w-full md:w-auto md:min-w-[20rem]" noValidate>
+        <form onSubmit={onSubmit} className={`w-full ${dense ? '' : 'md:w-auto md:min-w-[20rem]'}`} noValidate>
           <label htmlFor={inputId} className="sr-only">Votre adresse email</label>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <div className="flex flex-1 items-center gap-2 rounded-lg border border-navy-200 bg-white px-3 py-2.5 dark:border-navy-700 dark:bg-navy-800">
-              <Mail size={16} className="text-navy-400" />
+          <div className={`flex flex-col gap-2 ${dense ? '' : 'sm:flex-row'}`}>
+            <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border border-navy-200 bg-white px-3 py-2.5 dark:border-navy-700 dark:bg-navy-800">
+              <Mail size={16} className="shrink-0 text-navy-400" />
               <input
                 id={inputId}
                 type="email"
@@ -114,10 +115,10 @@ export default function EmailCapture({
                 onChange={(e) => { setEmail(e.target.value); if (status === 'error') setStatus('idle') }}
                 disabled={status === 'loading'}
                 aria-invalid={status === 'error'}
-                className="w-full bg-transparent text-sm text-navy-900 outline-none placeholder:text-navy-400 dark:text-white"
+                className="w-full min-w-0 bg-transparent text-sm text-navy-900 outline-none placeholder:text-navy-400 dark:text-white"
               />
             </div>
-            <button type="submit" disabled={status === 'loading'} className="btn-primary shrink-0">
+            <button type="submit" disabled={status === 'loading'} className={`btn-primary shrink-0 ${dense ? 'w-full' : ''}`}>
               {status === 'loading' ? (
                 <><Loader2 size={16} className="animate-spin" /> Envoi…</>
               ) : (
