@@ -167,10 +167,10 @@ export default function RetirementPlanner() {
                   <div className="mt-1 text-[11px] text-navy-400">
                     Rendement {Math.round((form.annualReturn + r.delta) * 1000) / 10} %/an
                   </div>
-                  <div className="mt-2 text-2xl font-extrabold tabular-nums text-navy-800 dark:text-white">
-                    {formatEUR(r.plan.monthlyNeeded)}
-                  </div>
-                  <div className="text-xs text-navy-400">par mois</div>
+                  <p className="mt-2 text-sm leading-snug text-navy-600 dark:text-navy-300">
+                    Pour obtenir <strong>{formatEUR(form.monthlyIncome)}/mois</strong>, il faut épargner{' '}
+                    <strong className="text-navy-800 dark:text-white">{formatEUR(r.plan.monthlyNeeded)}/mois</strong>.
+                  </p>
                   <div className="mt-2 flex items-center justify-center gap-1 text-xs font-semibold">
                     {achievable ? (
                       <span className="flex items-center gap-1 text-gain">
