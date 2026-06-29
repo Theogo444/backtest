@@ -17,7 +17,7 @@ import {
   Coins, ShieldCheck, PiggyBank, Landmark,
 } from 'lucide-react'
 import EmailCapture from '../marketing/EmailCapture'
-import { BROKERS, ENVELOPE_LABELS, FEES_AS_OF } from '../../data/brokers'
+import { BROKERS, ENVELOPE_LABELS, FEES_AS_OF, brokerOffers } from '../../data/brokers'
 
 // Courtiers particulièrement adaptés à un premier investissement (PEA + frais bas).
 const BEGINNER_PICKS = new Set(['trade-republic', 'bourse-direct'])
@@ -87,7 +87,7 @@ export default function BrokerComparator() {
       {/* Fiches détaillées */}
       <div className="grid gap-4 lg:grid-cols-2">
         {brokers.map((b) => (
-          <BrokerCard key={b.id} broker={b} />
+          <BrokerCard key={b.id} broker={b} envelope={filter === 'all' ? b.accounts[0] : filter} />
         ))}
       </div>
 
@@ -111,23 +111,38 @@ export default function BrokerComparator() {
               </tr>
             </thead>
             <tbody>
-              {brokers.map((b) => (
-                <tr key={b.id} className="border-b border-navy-50 align-top last:border-0 dark:border-navy-800">
-                  <td className="py-2.5 pr-3 font-bold text-navy-800 dark:text-white">{b.name}</td>
-                  <td className="py-2.5 pr-3">
-                    <div className="flex flex-wrap gap-1">
-                      {b.accounts.map((a) => (
-                        <span key={a} className="rounded bg-navy-100 px-1.5 py-0.5 text-[10px] font-bold text-navy-600 dark:bg-navy-700 dark:text-navy-200">
-                          {ENVELOPE_LABELS[a]}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="py-2.5 pr-3 text-navy-600 dark:text-navy-300">{b.orderFee}</td>
-                  <td className="py-2.5 pr-3 font-semibold text-navy-700 dark:text-navy-200">{b.custodyFee}</td>
-                  <td className="py-2.5 text-navy-600 dark:text-navy-300">{b.etfDeal}</td>
-                </tr>
-              ))}
+              {brokers.map((b) => {
+                const env = filter === 'all' ? b.accounts[0] : filter
+                const offers = brokerOffers(b, env)
+                const primary = offers[0] || {}
+                return (
+                  <tr key={b.id} className="border-b border-navy-50 align-top last:border-0 dark:border-navy-800">
+                    <td className="py-2.5 pr-3 font-bold text-navy-800 dark:text-white">
+                      {b.name}
+                      <span className="ml-1 text-[10px] font-semibold text-navy-400">
+                        ({ENVELOPE_LABELS[env]}
+                        {offers.length > 1 ? ` · ${offers.length} offres` : ''})
+                      </span>
+                    </td>
+                    <td className="py-2.5 pr-3">
+                      <div className="flex flex-wrap gap-1">
+                        {b.accounts.map((a) => (
+                          <span key={a} className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                            a === env
+                              ? 'bg-navy-800 text-white dark:bg-navy-200 dark:text-navy-900'
+                              : 'bg-navy-100 text-navy-600 dark:bg-navy-700 dark:text-navy-200'
+                          }`}>
+                            {ENVELOPE_LABELS[a]}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="py-2.5 pr-3 text-navy-600 dark:text-navy-300">{primary.orderFee}</td>
+                    <td className="py-2.5 pr-3 font-semibold text-navy-700 dark:text-navy-200">{primary.custodyFee}</td>
+                    <td className="py-2.5 text-navy-600 dark:text-navy-300">{primary.etfDeal}</td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -178,8 +193,15 @@ function ReadGuide({ icon: Icon, title, text }) {
   )
 }
 
-function BrokerCard({ broker }) {
+function BrokerCard({ broker, envelope }) {
   const isBeginner = BEGINNER_PICKS.has(broker.id)
+  const offers = brokerOffers(broker, envelope)
+  const [offerIdx, setOfferIdx] = useState(0)
+  // Garde-fou si l'enveloppe (et donc le nombre d'offres) change.
+  const idx = Math.min(offerIdx, Math.max(0, offers.length - 1))
+  const offer = offers[idx] || {}
+  const envMeta = ENVELOPE_META[envelope]
+
   return (
     <div className="card flex flex-col">
       <div className="flex items-start justify-between gap-2">
@@ -197,11 +219,12 @@ function BrokerCard({ broker }) {
         <div className="flex shrink-0 flex-wrap justify-end gap-1">
           {broker.accounts.map((a) => {
             const Icon = ENVELOPE_META[a].icon
+            const active = a === envelope
             return (
               <span
                 key={a}
                 className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold text-white"
-                style={{ backgroundColor: ENVELOPE_META[a].color }}
+                style={{ backgroundColor: ENVELOPE_META[a].color, opacity: active ? 1 : 0.4 }}
               >
                 <Icon size={11} /> {ENVELOPE_META[a].label}
               </span>
@@ -210,11 +233,37 @@ function BrokerCard({ broker }) {
         </div>
       </div>
 
-      {/* Frais clés */}
+      {/* Sélecteur d'offre (système) pour l'enveloppe active */}
+      {envMeta && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span
+            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-bold text-white"
+            style={{ backgroundColor: envMeta.color }}
+          >
+            <envMeta.icon size={12} /> Offre {envMeta.label}
+          </span>
+          {offers.length > 1 ? (
+            <select
+              value={idx}
+              onChange={(e) => setOfferIdx(Number(e.target.value))}
+              className="field flex-1 py-1 text-sm font-semibold"
+              aria-label={`Choisir l'offre ${envMeta.label} de ${broker.name}`}
+            >
+              {offers.map((o, i) => (
+                <option key={o.name} value={i}>{o.name}</option>
+              ))}
+            </select>
+          ) : (
+            <span className="text-sm font-semibold text-navy-700 dark:text-navy-200">{offer.name}</span>
+          )}
+        </div>
+      )}
+
+      {/* Frais clés de l'offre sélectionnée */}
       <div className="mt-3 grid grid-cols-3 gap-2">
-        <FeeBox label="Par ordre" value={broker.orderFee} />
-        <FeeBox label="Droits de garde" value={broker.custodyFee} />
-        <FeeBox label="ETF offerts" value={broker.etfDeal} />
+        <FeeBox label="Par ordre" value={offer.orderFee} />
+        <FeeBox label="Droits de garde" value={offer.custodyFee} />
+        <FeeBox label="ETF offerts" value={offer.etfDeal} />
       </div>
 
       {/* Points forts / faibles */}

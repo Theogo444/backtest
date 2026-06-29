@@ -43,6 +43,14 @@ export const BROKERS = [
     pros: ['Parmi les courtages les moins chers', 'PEA, PEA-PME et compte-titres', 'Spécialiste français de la bourse'],
     cons: ['Interface un peu datée', "Pas d'assurance-vie"],
     url: '#affiliate-bourse-direct',
+    offers: {
+      pea: [
+        { name: 'Grille Classique', orderFee: '0,99 € (≤ 500 €) → 3,80 € (≤ 4 400 €), puis 0,09 %', custodyFee: '0 €', etfDeal: '1er ordre ETF Amundi offert chaque mois' },
+      ],
+      cto: [
+        { name: 'Grille Classique', orderFee: '0,99 € (≤ 500 €) → 3,80 € (≤ 4 400 €), puis 0,09 %', custodyFee: '0 €', etfDeal: '1er ordre ETF Amundi offert chaque mois' },
+      ],
+    },
   },
   {
     id: 'trade-republic',
@@ -59,6 +67,16 @@ export const BROKERS = [
     pros: ["PEA avec plans d'épargne automatiques sans frais", '1 €/ordre seulement', 'Application mobile très soignée'],
     cons: ['Pas de plateforme web complète', 'Tout se gère depuis le téléphone'],
     url: '#affiliate-trade-republic',
+    offers: {
+      pea: [
+        { name: "Plan d'épargne (DCA)", orderFee: '0 € (investissement programmé automatique)', custodyFee: '0 €', etfDeal: 'DCA sur ETF sans frais de courtage' },
+        { name: 'Ordre au comptant', orderFee: '1 €/ordre, quel que soit le montant', custodyFee: '0 €', etfDeal: '—' },
+      ],
+      cto: [
+        { name: "Plan d'épargne (DCA)", orderFee: '0 € (investissement programmé automatique)', custodyFee: '0 €', etfDeal: 'DCA sur actions et ETF sans frais' },
+        { name: 'Ordre au comptant', orderFee: '1 €/ordre, quel que soit le montant', custodyFee: '0 €', etfDeal: '—' },
+      ],
+    },
   },
   {
     id: 'fortuneo',
@@ -75,6 +93,18 @@ export const BROKERS = [
     pros: ['0 € de droits de garde', 'Banque en ligne complète et réputée', 'PEA et compte-titres'],
     cons: ['Courtage en pourcentage', 'Moins adapté aux très gros ordres'],
     url: '#affiliate-fortuneo',
+    offers: {
+      pea: [
+        { name: 'Starter', orderFee: '1er ordre/mois ≤ 500 € offert, puis 0,35 % du montant', custodyFee: '0 €', etfDeal: '1er ordre ETF Amundi remboursé chaque mois' },
+        { name: 'Progress', orderFee: 'Paliers : dès ~1,95 €, 4,90 € (≤ 3 000 €), puis dégressif', custodyFee: '0 €', etfDeal: '1er ordre ETF Amundi remboursé chaque mois' },
+        { name: 'Trader actif (100 ordres)', orderFee: '6,50 €/ordre (≤ 100 000 €) · versement initial 1 000 €', custodyFee: '0 €', etfDeal: '—' },
+      ],
+      cto: [
+        { name: 'Starter', orderFee: '1er ordre/mois ≤ 500 € offert, puis 0,35 % du montant', custodyFee: '0 €', etfDeal: '1er ordre ETF Amundi remboursé chaque mois' },
+        { name: 'Progress', orderFee: 'Paliers : dès ~1,95 €, 4,90 € (≤ 3 000 €), puis dégressif', custodyFee: '0 €', etfDeal: '1er ordre ETF Amundi remboursé chaque mois' },
+        { name: 'Trader actif (100 ordres)', orderFee: '6,50 €/ordre (≤ 100 000 €) · versement initial 1 000 €', custodyFee: '0 €', etfDeal: '—' },
+      ],
+    },
   },
   {
     id: 'boursobank',
@@ -91,6 +121,21 @@ export const BROKERS = [
     pros: ['PEA, compte-titres et assurance-vie', 'Banque en ligne complète', '176 ETF sans frais (BoursoMarkets)'],
     cons: ['Courtage en pourcentage sur les gros ordres', 'Gratuité ETF conditionnée à 500 €'],
     url: '#affiliate-boursobank',
+    offers: {
+      pea: [
+        { name: 'Découverte', orderFee: '1,99 € (≤ 500 €) puis ~0,60 % du montant', custodyFee: '0 €', etfDeal: '176 ETF à 0 € via BoursoMarkets (achat ≥ 500 €)' },
+        { name: 'BoursoMarkets', orderFee: '0 € sur 176 ETF (achat ≥ 500 €), sinon tarif Découverte', custodyFee: '0 €', etfDeal: '176 ETF à 0 € de courtage à l’achat' },
+        { name: 'Trader / Ultimate Trader', orderFee: '16,55 € (≤ 7 750 €) ou 9,90 € (≤ 10 000 €, 30 ordres/mois)', custodyFee: '0 €', etfDeal: '—' },
+      ],
+      cto: [
+        { name: 'Découverte', orderFee: '1,99 € (≤ 500 €) puis ~0,60 % du montant', custodyFee: '0 €', etfDeal: '176 ETF à 0 € via BoursoMarkets (achat ≥ 500 €)' },
+        { name: 'BoursoMarkets', orderFee: '0 € sur 176 ETF (achat ≥ 500 €), sinon tarif Découverte', custodyFee: '0 €', etfDeal: '176 ETF à 0 € de courtage à l’achat' },
+        { name: 'Trader / Ultimate Trader', orderFee: '16,55 € (≤ 7 750 €) ou 9,90 € (≤ 10 000 €, 30 ordres/mois)', custodyFee: '0 €', etfDeal: '—' },
+      ],
+      av: [
+        { name: 'Boursorama Vie', orderFee: '0 € de frais sur versement', custodyFee: '0,75 %/an (frais de gestion AV)', etfDeal: 'ETF, fonds et SCPI éligibles en assurance-vie' },
+      ],
+    },
   },
   {
     id: 'saxo',
@@ -107,6 +152,15 @@ export const BROKERS = [
     pros: ['Courtage ETF parmi les plus bas', 'PEA et compte-titres', 'Offre PEA sans frais en 2026'],
     cons: ['Plateforme dense pour un débutant', 'Frais de change 0,25 % sur devises'],
     url: '#affiliate-saxo',
+    offers: {
+      pea: [
+        { name: 'PEA sans frais 2026', orderFee: '0 € de courtage en 2026 (70 actions PEA + sélection d’ETF)', custodyFee: '0 €', etfDeal: 'Transfert de PEA remboursé + 70 actions offertes' },
+        { name: 'Tarif Classic', orderFee: '0,08 %/ordre (min ~2 €), plafonné 0,5 % sur PEA', custodyFee: '0 €', etfDeal: 'ETF Amundi sans frais' },
+      ],
+      cto: [
+        { name: 'Tarif Classic', orderFee: '0,08 %/ordre (min ~2 €)', custodyFee: '0 €', etfDeal: 'ETF Amundi sans frais' },
+      ],
+    },
   },
   {
     id: 'degiro',
@@ -123,6 +177,11 @@ export const BROKERS = [
     pros: ['Frais très bas', 'Univers d’ETF parmi les plus larges', 'Courtier européen établi'],
     cons: ['Pas de PEA (compte-titres uniquement)', 'Déclaration fiscale à faire soi-même'],
     url: '#affiliate-degiro',
+    offers: {
+      cto: [
+        { name: 'Tarif unique', orderFee: '1 €/ordre Euronext · autres ETF 3 €', custodyFee: '0 €', etfDeal: 'Sélection d’ETF « core » à 1 € par transaction' },
+      ],
+    },
   },
   {
     id: 'trading212',
@@ -139,6 +198,11 @@ export const BROKERS = [
     pros: ['0 commission sur actions et ETF', 'Investissement fractionné', 'Application simple'],
     cons: ['Pas de PEA (compte-titres uniquement)', 'Frais de change 0,15 %', 'Courtier étranger : déclaration 3916'],
     url: '#affiliate-trading212',
+    offers: {
+      cto: [
+        { name: 'Invest (sans commission)', orderFee: '0 € de commission sur actions et ETF', custodyFee: '0 €', etfDeal: 'Actions et ETF sans commission, investissement fractionné' },
+      ],
+    },
   },
   {
     id: 'linxea',
@@ -155,6 +219,12 @@ export const BROKERS = [
     pros: ['0 € de frais sur versement', '0,5 %/an seulement (Linxea Spirit 2)', 'Large choix d’ETF et de SCPI'],
     cons: ["Frais de gestion annuels (propres à l'AV)"],
     url: '#affiliate-linxea',
+    offers: {
+      av: [
+        { name: 'Linxea Spirit 2', orderFee: '0 € sur versement · 0,06 % par arbitrage ETF', custodyFee: '0,5 %/an (frais de gestion)', etfDeal: '80+ ETF et SCPI éligibles' },
+        { name: 'Linxea Avenir 2', orderFee: '0 € sur versement', custodyFee: '0,6 %/an (frais de gestion)', etfDeal: 'Fonds en euros + large choix d’unités de compte' },
+      ],
+    },
   },
   {
     id: 'yomoni',
@@ -171,8 +241,23 @@ export const BROKERS = [
     pros: ['Gestion pilotée automatique', 'Aucune décision à prendre', 'Idéal « mains libres »'],
     cons: ['Frais annuels plus élevés', 'Moins de contrôle sur les choix'],
     url: '#affiliate-yomoni',
+    offers: {
+      av: [
+        { name: 'Gestion pilotée', orderFee: 'Aucun ordre à passer (gestion pilotée)', custodyFee: '≈ 1,6 %/an tout compris', etfDeal: 'Portefeuille d’ETF géré automatiquement pour vous' },
+      ],
+    },
   },
 ]
+
+// Renvoie la liste des offres (programmes tarifaires) d'un courtier pour une
+// enveloppe donnée. Replie sur la première enveloppe disponible si l'enveloppe
+// demandée n'est pas proposée (ex. filtre « Tous »).
+export function brokerOffers(broker, envelope) {
+  const o = broker.offers || {}
+  if (envelope && o[envelope]) return o[envelope]
+  const first = broker.accounts.find((a) => o[a])
+  return first ? o[first] : []
+}
 
 export function getBroker(id) {
   return BROKERS.find((b) => b.id === id) || BROKERS[0]
