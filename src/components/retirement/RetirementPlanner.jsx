@@ -5,7 +5,7 @@
 // ============================================================================
 
 import { useState, useMemo } from 'react'
-import { Landmark, CheckCircle2, XCircle } from 'lucide-react'
+import { Landmark, CheckCircle2, XCircle, Info } from 'lucide-react'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -25,17 +25,18 @@ function realMonthlyRate(annualReturn, inflation) {
 }
 
 // Calcule l'épargne mensuelle requise + la trajectoire pour un scénario
-function planRetirement({ currentAge, retireAge, lifeExpectancy, monthlyIncome, annualReturn, inflation, currentSavings }) {
+function planRetirement({ currentAge, retireAge, lifeExpectancy, monthlyIncome, annualReturn, inflation, currentSavings, bequest = 0 }) {
   const n1 = Math.max(0, retireAge - currentAge) // années d'accumulation
   const n2 = Math.max(1, lifeExpectancy - retireAge) // années de retraite
   const N1 = n1 * 12
   const N2 = n2 * 12
   const rm = realMonthlyRate(annualReturn, inflation)
 
-  // Capital nécessaire à la retraite (valeur actuelle d'une rente, euros constants)
+  // Capital nécessaire à la retraite : valeur actuelle de la rente (revenu) +
+  // valeur actuelle de l'héritage que l'on veut laisser en fin de vie.
   let capitalNeeded
-  if (Math.abs(rm) < 1e-9) capitalNeeded = monthlyIncome * N2
-  else capitalNeeded = monthlyIncome * (1 - Math.pow(1 + rm, -N2)) / rm
+  if (Math.abs(rm) < 1e-9) capitalNeeded = monthlyIncome * N2 + bequest
+  else capitalNeeded = monthlyIncome * (1 - Math.pow(1 + rm, -N2)) / rm + bequest * Math.pow(1 + rm, -N2)
 
   // Apport déjà constitué, capitalisé jusqu'à la retraite
   const grownSavings = currentSavings * Math.pow(1 + rm, N1)
@@ -71,7 +72,7 @@ function buildTrajectory({ currentAge, retireAge, lifeExpectancy, monthlyIncome,
 }
 
 const SCENARIOS = [
-  { id: 'pessimiste', label: 'Pessimiste', delta: -0.02, color: '#ef4444' },
+  { id: 'prudent', label: 'Prudent', delta: -0.02, color: '#d97706' },
   { id: 'neutre', label: 'Neutre', delta: 0, color: '#1e3a5f' },
   { id: 'optimiste', label: 'Optimiste', delta: 0.02, color: '#10b981' },
 ]
@@ -85,6 +86,7 @@ export default function RetirementPlanner() {
     annualReturn: 0.06,
     inflation: 0.02,
     currentSavings: 5000,
+    bequest: 0,
   })
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
@@ -125,6 +127,18 @@ export default function RetirementPlanner() {
         </p>
       </header>
 
+      {/* Principe en une phrase */}
+      <div className="mb-4 flex items-start gap-3 rounded-2xl border-l-4 border-l-navy-800 bg-navy-50/70 p-4 dark:border-l-navy-300 dark:bg-navy-900/50">
+        <Info size={18} className="mt-0.5 shrink-0 text-navy-700 dark:text-navy-300" />
+        <p className="text-sm leading-relaxed text-navy-600 dark:text-navy-300">
+          <strong className="text-navy-800 dark:text-white">Le principe :</strong> avant 64 ans, vous{' '}
+          <strong>épargnez</strong> chaque mois pour vous constituer un capital
+          (phase d'accumulation). Une fois à la retraite, vous{' '}
+          <strong>puisez dans cette épargne</strong> pour vivre et compléter vos revenus
+          (phase de décumulation). Ce simulateur calcule l'effort d'épargne mensuel nécessaire pour y arriver.
+        </p>
+      </div>
+
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Formulaire */}
         <div className="card space-y-3 lg:col-span-1">
@@ -134,6 +148,7 @@ export default function RetirementPlanner() {
           <Field label="Espérance de vie" value={form.lifeExpectancy} onChange={(v) => set('lifeExpectancy', Number(v))} suffix="ans" />
           <Field label="Revenu mensuel souhaité" value={form.monthlyIncome} onChange={(v) => set('monthlyIncome', Number(v))} step={100} suffix="€" />
           <Field label="Épargne déjà constituée" value={form.currentSavings} onChange={(v) => set('currentSavings', Number(v))} step={1000} suffix="€" />
+          <Field label="À laisser à vos enfants" hint="Capital que vous souhaitez transmettre en fin de vie (héritage)." value={form.bequest} onChange={(v) => set('bequest', Number(v))} step={1000} suffix="€" />
           <Field label="Rendement annuel estimé" value={Math.round(form.annualReturn * 1000) / 10} onChange={(v) => set('annualReturn', Number(v) / 100)} step={0.5} suffix="%" />
           <Field label="Inflation estimée" value={Math.round(form.inflation * 1000) / 10} onChange={(v) => set('inflation', Number(v) / 100)} step={0.1} suffix="%" />
         </div>
@@ -175,7 +190,11 @@ export default function RetirementPlanner() {
           <div className="card">
             <p className="text-sm text-navy-600 dark:text-navy-300">
               Pour viser <strong>{formatEUR(form.monthlyIncome)}</strong>/mois de la retraite ({form.retireAge} ans)
-              jusqu'à {form.lifeExpectancy} ans, il faut un capital d'environ{' '}
+              jusqu'à {form.lifeExpectancy} ans
+              {form.bequest > 0 && (
+                <> et laisser <strong>{formatEUR(form.bequest)}</strong> à vos enfants</>
+              )}
+              , il faut un capital d'environ{' '}
               <strong>{formatEUR(neutral.plan.capitalNeeded)}</strong> (euros constants), soit une épargne de{' '}
               <strong className="text-navy-800 dark:text-white">{formatEUR(neutral.plan.monthlyNeeded)}/mois</strong>{' '}
               dans le scénario neutre.
@@ -207,7 +226,10 @@ export default function RetirementPlanner() {
             </div>
             <p className="mt-2 text-xs text-navy-400">
               Phase d'accumulation jusqu'à {form.retireAge} ans, puis décumulation (retraits) jusqu'à{' '}
-              {form.lifeExpectancy} ans.
+              {form.lifeExpectancy} ans
+              {form.bequest > 0
+                ? `, en conservant ${formatEUR(form.bequest)} à transmettre à vos enfants.`
+                : '.'}
             </p>
           </div>
 
@@ -217,7 +239,7 @@ export default function RetirementPlanner() {
   )
 }
 
-function Field({ label, value, onChange, suffix, step = 1 }) {
+function Field({ label, value, onChange, suffix, step = 1, hint }) {
   return (
     <div>
       <label className="label">{label}</label>
@@ -225,6 +247,7 @@ function Field({ label, value, onChange, suffix, step = 1 }) {
         <input type="number" value={value} step={step} onChange={(e) => onChange(e.target.value)} className="field" />
         {suffix && <span className="text-xs text-navy-400">{suffix}</span>}
       </div>
+      {hint && <p className="mt-1 text-[11px] leading-snug text-navy-400">{hint}</p>}
     </div>
   )
 }
