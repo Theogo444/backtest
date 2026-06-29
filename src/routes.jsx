@@ -12,6 +12,7 @@ import BrokerComparatorPage from './pages/BrokerComparatorPage'
 import RetirementPage from './pages/RetirementPage'
 import MonteCarloPage from './pages/MonteCarloPage'
 import GlossaryPage from './pages/GlossaryPage'
+import FaqPage from './pages/FaqPage'
 import GuidesIndex from './pages/GuidesIndex'
 import GuideArticle from './pages/GuideArticle'
 import PrivacyPolicy from './pages/PrivacyPolicy'
@@ -31,6 +32,7 @@ export const routes = [
       { path: 'retraite', element: <RetirementPage /> },
       { path: 'monte-carlo', element: <MonteCarloPage /> },
       { path: 'glossaire', element: <GlossaryPage /> },
+      { path: 'faq', element: <FaqPage /> },
       { path: 'guides', element: <GuidesIndex /> },
       {
         path: 'guides/:slug',

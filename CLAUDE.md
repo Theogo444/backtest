@@ -5,7 +5,7 @@ React 18 + Vite · **vite-react-ssg** (pré-rendu statique) + **react-router-dom
 
 ## Pages (vraies routes pré-rendues, table dans `src/routes.jsx`)
 - `/` Accueil éditoriale · `/simulateur-debutant` simulateur guidé (courtier→enveloppe→actifs→plan, `BeginnerSimulator.jsx` ; mise en page **de haut en bas** : les 4 étapes en grille 2 colonnes en haut, puis le résultat en pleine largeur en dessous) · `/simulateur` simulateur avancé (8 stratégies : Lump Sum, DCA, Value Averaging, DCA dynamique, Buy & Hold, Rééquilibrage, Stock Picking, Momentum ; CAGR/Sharpe/MaxDD/vol).
-- `/comparateur` fiscal PEA/CTO/AV (`EnvelopeComparator.jsx`) · `/comparatif-courtiers` comparatif des 9 courtiers (`BrokerComparator.jsx`, données `src/data/brokers.js`, filtre par enveloppe + fiches + tableau) · `/retraite` · `/monte-carlo` (100–5000 trajectoires) · `/glossaire` (`schema.org/FAQPage`).
+- `/comparateur` fiscal PEA/CTO/AV (`EnvelopeComparator.jsx`) · `/comparatif-courtiers` comparatif des 9 courtiers (`BrokerComparator.jsx`, données `src/data/brokers.js`, filtre par enveloppe + fiches + tableau) · `/retraite` · `/monte-carlo` (100–5000 trajectoires) · `/glossaire` (`schema.org/FAQPage`) · `/faq` (`Faq.jsx`, ~35 questions classées par thème, recherche + filtre, `schema.org/FAQPage`).
 - `/guides` + `/guides/:slug` — articles SEO. Ajouter un guide = déposer un `.js` dans `src/content/guides/` (collecté via `import.meta.glob`, rendu `marked`, schema Article).
 - `/confidentialite` (RGPD ; identité éditeur en `[À COMPLÉTER]`).
 
