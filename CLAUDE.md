@@ -5,7 +5,7 @@ React 18 + Vite · **vite-react-ssg** (pré-rendu statique) + **react-router-dom
 
 ## Pages (vraies routes pré-rendues, table dans `src/routes.jsx`)
 - `/` Accueil éditoriale · `/simulateur-debutant` simulateur guidé (courtier→enveloppe→actifs→plan, `BeginnerSimulator.jsx`) · `/simulateur` simulateur avancé (8 stratégies : Lump Sum, DCA, Value Averaging, DCA dynamique, Buy & Hold, Rééquilibrage, Stock Picking, Momentum ; CAGR/Sharpe/MaxDD/vol).
-- `/comparateur` fiscal PEA/CTO/AV (`EnvelopeComparator.jsx`) · `/retraite` · `/monte-carlo` (100–5000 trajectoires) · `/glossaire` (`schema.org/FAQPage`).
+- `/comparateur` fiscal PEA/CTO/AV (`EnvelopeComparator.jsx`) · `/comparatif-courtiers` comparatif des 9 courtiers (`BrokerComparator.jsx`, données `src/data/brokers.js`, filtre par enveloppe + fiches + tableau) · `/retraite` · `/monte-carlo` (100–5000 trajectoires) · `/glossaire` (`schema.org/FAQPage`).
 - `/guides` + `/guides/:slug` — articles SEO. Ajouter un guide = déposer un `.js` dans `src/content/guides/` (collecté via `import.meta.glob`, rendu `marked`, schema Article).
 - `/confidentialite` (RGPD ; identité éditeur en `[À COMPLÉTER]`).
 
@@ -44,7 +44,7 @@ launchctl kickstart -k gui/$(id -u)/com.backtest.daily-refresh  # test immédiat
 
 ## Monétisation & acquisition (tout en placeholder/mock à brancher)
 - **Pas de publicité** : tous les emplacements AdSense (composant `AdSlot`, classe `.ad-slot`, script `index.html`) ont été **retirés** le 2026-06-29. Ne pas les réintroduire sans demande explicite.
-- **Affiliation** : `href="#affiliate-*"` dans `src/data/affiliates.js` (CTA accueil/articles) et `src/data/brokers.js` (9 courtiers, frais INDICATIFS à vérifier).
+- **Affiliation** : `href="#affiliate-*"` dans `src/data/affiliates.js` (CTA accueil/articles) et `src/data/brokers.js` (9 courtiers, frais INDICATIFS vérifiés sur grilles publiques juin 2026, à re-vérifier périodiquement). ⚠️ **Pas de note « sur 5 »** : on n'affiche aucune notation maison non vérifiable (retirées le 2026-06-29). Ne pas réintroduire de `rating` inventé.
 - **Capture email** : `marketing/EmailCapture.jsx` (4 emplacements : home, sortie des 2 simulateurs, fin d'article) → `services/emailSignup.js` (**MOCK localStorage** ; brancher provider via Vercel Function `/api/subscribe`, bloc documenté).
 - **Partage** : `marketing/ShareResult.jsx` (lien + copie + Web Share + export PNG `utils/shareCard.js`). État encodé LISIBLE dans l'URL via `utils/share.js`, restauré au montage. 
 - **Analytics** : `utils/track.js` (no-op tant qu'aucun GA4/GTM/Plausible branché).
