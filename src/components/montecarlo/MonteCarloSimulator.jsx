@@ -16,7 +16,6 @@ import {
   CartesianGrid,
   Tooltip as RTooltip,
 } from 'recharts'
-import AdSlot from '../layout/AdSlot'
 import { useSimulation } from '../../hooks/useSimulation'
 import { runMonteCarlo, estimateParams } from '../../utils/montecarlo'
 import { formatEUR, formatPct } from '../../utils/metrics'
@@ -213,8 +212,6 @@ export default function MonteCarloSimulator({ config, marketData }) {
             </p>
           </div>
 
-          {/* AdSense slot: MONTECARLO_RECTANGLE */}
-          <AdSlot format="rectangle" position="MONTECARLO_RECTANGLE" />
         </div>
       </div>
     </section>

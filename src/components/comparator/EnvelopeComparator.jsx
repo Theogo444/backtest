@@ -15,7 +15,6 @@ import {
   Cell,
   LabelList,
 } from 'recharts'
-import AdSlot from '../layout/AdSlot'
 import { useSimulation } from '../../hooks/useSimulation'
 import { compareEnvelopes } from '../../utils/fiscalite'
 import { formatEUR, formatPct } from '../../utils/metrics'
@@ -204,9 +203,6 @@ export default function EnvelopeComparator({ config, marketData }) {
           </div>
         ))}
       </div>
-
-      {/* AdSense slot: COMPARATOR_RECTANGLE */}
-      <AdSlot format="rectangle" position="COMPARATOR_RECTANGLE" />
 
       {/* Liens d'affiliation : ouvrir un compte */}
       <div className="mt-4 card">

@@ -9,7 +9,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import Navbar from '../components/layout/Navbar'
 import Footer from '../components/layout/Footer'
-import AdSlot from '../components/layout/AdSlot'
 import { useMarketData } from '../hooks/useMarketData'
 
 // Configuration par défaut du simulateur (partagée Simulateur / Monte Carlo / comparateur)
@@ -84,21 +83,12 @@ export default function RootLayout() {
 
       <div className="md:pl-64">
         <main className="mx-auto max-w-6xl px-4 pb-24 pt-4 md:px-8 md:pb-10">
-          {/* AdSense slot: TOP_LEADERBOARD */}
-          <AdSlot format="leaderboard" position="TOP_LEADERBOARD" className="hidden md:flex" />
-          <AdSlot format="mobileBanner" position="TOP_MOBILE_BANNER" className="md:hidden" />
-
           <div className="animate-fade-in">
             <Outlet context={shared} />
           </div>
 
           <Footer source={marketData.source} updatedAt={marketData.updatedAt} />
         </main>
-      </div>
-
-      {/* AdSense slot: STICKY_FOOTER_MOBILE */}
-      <div className="fixed bottom-12 left-0 right-0 z-20 flex justify-center md:hidden">
-        <AdSlot format="mobileBanner" position="STICKY_FOOTER_MOBILE" className="!my-0 shadow-lg" />
       </div>
     </div>
   )

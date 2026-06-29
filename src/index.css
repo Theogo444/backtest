@@ -93,14 +93,6 @@
     @apply border-navy-600 bg-navy-800 text-navy-100 hover:bg-navy-700;
   }
 
-  /* Emplacement publicitaire (AdSense) */
-  .ad-slot {
-    @apply flex items-center justify-center overflow-hidden rounded-lg border border-dashed border-navy-200 bg-navy-50/50 text-xs text-navy-400;
-  }
-  .dark .ad-slot {
-    @apply border-navy-700 bg-navy-900/40 text-navy-500;
-  }
-
   /* Skeleton loader (chargement progressif) */
   .skeleton {
     @apply animate-pulse rounded-md bg-navy-100;

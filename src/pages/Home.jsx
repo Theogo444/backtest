@@ -11,7 +11,6 @@ import {
   Rocket, LineChart, Scale, Landmark, Dices, ArrowRight, ShieldCheck,
   PiggyBank, Wallet, Star, Clock, Check, Database, BadgeCheck, Sparkles,
 } from 'lucide-react'
-import AdSlot from '../components/layout/AdSlot'
 import EmailCapture from '../components/marketing/EmailCapture'
 import { BROKERS } from '../data/affiliates'
 import { GUIDES } from '../data/guides'
@@ -287,9 +286,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* AdSense slot: HOME_MID_RECTANGLE */}
-      <AdSlot format="rectangle" position="HOME_MID_RECTANGLE" className="my-10" />
 
       {/* ----------------------- Courtiers (affiliation) ----------------------- */}
       <section className="mt-12">

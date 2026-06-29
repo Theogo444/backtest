@@ -17,7 +17,6 @@ import {
   Check, ArrowRight, Info, Star, AlertTriangle, Sparkles,
 } from 'lucide-react'
 import AssetSearch from './AssetSearch'
-import AdSlot from '../layout/AdSlot'
 import ShareResult from '../marketing/ShareResult'
 import EmailCapture from '../marketing/EmailCapture'
 import { useSimulation } from '../../hooks/useSimulation'
@@ -533,9 +532,6 @@ function ResultPanel({ broker, envelope, plan, amount, assetNames, summary, char
           tone="gain"
         />
       </div>
-
-      {/* AdSense slot: BEGINNER_RESULT_RECTANGLE */}
-      <AdSlot format="rectangle" position="BEGINNER_RESULT_RECTANGLE" />
 
       {/* Graphique simple */}
       <div className="card">

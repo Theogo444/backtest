@@ -10,7 +10,6 @@ import StrategySelector from './StrategySelector'
 import ParametersPanel from './ParametersPanel'
 import ResultsMetrics from './ResultsMetrics'
 import ResultsCharts from './ResultsCharts'
-import AdSlot from '../layout/AdSlot'
 import ShareResult from '../marketing/ShareResult'
 import EmailCapture from '../marketing/EmailCapture'
 import { MetricsSkeleton, ChartSkeleton } from '../ui/Skeleton'
@@ -119,9 +118,6 @@ export default function Simulator({ config, updateConfig, marketData }) {
           ) : (
             <>
               <ResultsMetrics metrics={result.metrics} adjustInflation={result.adjustInflation} />
-
-              {/* AdSense slot: RESULTS_RECTANGLE */}
-              <AdSlot format="rectangle" position="RESULTS_RECTANGLE" />
 
               <ResultsCharts result={result} />
 

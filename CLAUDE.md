@@ -43,7 +43,7 @@ launchctl kickstart -k gui/$(id -u)/com.backtest.daily-refresh  # test immédiat
 ```
 
 ## Monétisation & acquisition (tout en placeholder/mock à brancher)
-- **AdSense** : `AdSlot` (`<!-- AdSense slot: … -->`). Script à décommenter dans `index.html`.
+- **Pas de publicité** : tous les emplacements AdSense (composant `AdSlot`, classe `.ad-slot`, script `index.html`) ont été **retirés** le 2026-06-29. Ne pas les réintroduire sans demande explicite.
 - **Affiliation** : `href="#affiliate-*"` dans `src/data/affiliates.js` (CTA accueil/articles) et `src/data/brokers.js` (9 courtiers, frais INDICATIFS à vérifier).
 - **Capture email** : `marketing/EmailCapture.jsx` (4 emplacements : home, sortie des 2 simulateurs, fin d'article) → `services/emailSignup.js` (**MOCK localStorage** ; brancher provider via Vercel Function `/api/subscribe`, bloc documenté).
 - **Partage** : `marketing/ShareResult.jsx` (lien + copie + Web Share + export PNG `utils/shareCard.js`). État encodé LISIBLE dans l'URL via `utils/share.js`, restauré au montage. 

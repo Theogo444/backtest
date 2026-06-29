@@ -3,7 +3,6 @@
 // ============================================================================
 
 import { Link } from 'react-router-dom'
-import AdSlot from './AdSlot'
 
 export default function Footer({ source, updatedAt }) {
   const updatedLabel = updatedAt
@@ -11,9 +10,6 @@ export default function Footer({ source, updatedAt }) {
     : null
   return (
     <footer className="mt-10 border-t border-navy-100 pt-6 dark:border-navy-800">
-      {/* AdSense slot: FOOTER_INTERSTITIAL */}
-      <AdSlot format="leaderboard" position="FOOTER_INTERSTITIAL" className="hidden md:flex" />
-
       <div className="grid gap-6 px-1 py-6 text-sm text-navy-500 md:grid-cols-3">
         <div>
           <h3 className="mb-2 font-bold text-navy-700 dark:text-navy-200">Simulateur de Portefeuille FR</h3>

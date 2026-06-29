@@ -7,7 +7,6 @@ import { Head } from 'vite-react-ssg'
 import { Link, useParams, Navigate } from 'react-router-dom'
 import { marked } from 'marked'
 import { Clock, ChevronRight, ArrowRight, ShieldCheck, LineChart } from 'lucide-react'
-import AdSlot from '../components/layout/AdSlot'
 import EmailCapture from '../components/marketing/EmailCapture'
 import { getGuide, GUIDES } from '../data/guides'
 import { BROKERS } from '../data/affiliates'
@@ -143,9 +142,6 @@ export default function GuideArticle() {
           title={`Recevez ${leadMagnet}`}
           subtitle="Un email court et concret pour passer à l'action sans vous tromper."
         />
-
-        {/* AdSense slot: ARTICLE_FOOTER_RECTANGLE */}
-        <AdSlot format="rectangle" position="ARTICLE_FOOTER_RECTANGLE" className="mt-8" />
 
         {/* Articles liés */}
         {related.length > 0 && (

@@ -5,7 +5,6 @@
 import { Head } from 'vite-react-ssg'
 import { Link } from 'react-router-dom'
 import { Clock, ArrowRight, Newspaper } from 'lucide-react'
-import AdSlot from '../components/layout/AdSlot'
 import { GUIDES } from '../data/guides'
 
 function formatDate(d) {
@@ -64,8 +63,6 @@ export default function GuidesIndex() {
         ))}
       </section>
 
-      {/* AdSense slot: GUIDES_FOOTER_RECTANGLE */}
-      <AdSlot format="rectangle" position="GUIDES_FOOTER_RECTANGLE" className="mt-8" />
     </>
   )
 }

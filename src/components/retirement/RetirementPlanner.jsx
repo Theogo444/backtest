@@ -16,7 +16,6 @@ import {
   Tooltip as RTooltip,
   ReferenceLine,
 } from 'recharts'
-import AdSlot from '../layout/AdSlot'
 import { formatEUR } from '../../utils/metrics'
 
 // Rendement réel mensuel à partir d'un rendement et d'une inflation annuels
@@ -212,8 +211,6 @@ export default function RetirementPlanner() {
             </p>
           </div>
 
-          {/* AdSense slot: RETIREMENT_RECTANGLE */}
-          <AdSlot format="rectangle" position="RETIREMENT_RECTANGLE" />
         </div>
       </div>
     </section>

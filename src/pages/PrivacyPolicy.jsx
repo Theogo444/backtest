@@ -66,10 +66,10 @@ export default function PrivacyPolicy() {
 
           <h2>Cookies et mesure d'audience</h2>
           <p>
-            Le site peut utiliser des cookies de mesure d'audience et, le cas échéant, des emplacements
-            publicitaires. Ces outils ne sont activés qu'avec votre accord lorsque la réglementation
-            l'exige. <strong>[À COMPLÉTER : préciser les outils réellement utilisés — Google
-            Analytics, AdSense, etc. — une fois activés.]</strong>
+            Le site peut utiliser des cookies de mesure d'audience. Ces outils ne sont activés
+            qu'avec votre accord lorsque la réglementation l'exige. <strong>[À COMPLÉTER : préciser
+            les outils réellement utilisés — par exemple un outil d'analyse d'audience — une fois
+            activés.]</strong>
           </p>
 
           <h2>Prestataire d'emailing</h2>
