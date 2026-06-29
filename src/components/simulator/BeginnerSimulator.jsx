@@ -333,8 +333,10 @@ export default function BeginnerSimulator({ marketData }) {
               />
               <p className="mt-2 flex items-start gap-1.5 px-1 text-[11px] leading-snug text-navy-500 dark:text-navy-400">
                 <Sparkles size={13} className="mt-0.5 shrink-0" />
-                Pas sûr ? Un <strong className="mx-1 font-semibold">ETF Monde (MSCI World)</strong> est
-                le grand classique pour débuter : il investit dans plus de 1 500 entreprises mondiales.
+                <span>
+                  Pas sûr ? Un <strong className="font-semibold">ETF Monde (MSCI World)</strong> est le
+                  grand classique pour débuter : il investit dans plus de 1 500 entreprises mondiales.
+                </span>
               </p>
               {ineligible.length > 0 && (
                 <p className="mt-2 flex items-start gap-1.5 rounded-lg bg-amber-50 px-2.5 py-2 text-[11px] leading-snug text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">

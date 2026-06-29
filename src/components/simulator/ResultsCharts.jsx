@@ -19,6 +19,7 @@ import {
   CartesianGrid,
   Tooltip as RTooltip,
   Legend,
+  LabelList,
 } from 'recharts'
 import { formatEUR, formatPct } from '../../utils/metrics'
 
@@ -97,11 +98,11 @@ export default function ResultsCharts({ result }) {
   const gain = metrics.gainAbs
   const finalValue = metrics.finalValue
   const waterfallData = [
-    { name: 'Total investi', base: 0, amount: invested, fill: '#334e68' },
+    { name: 'Total investi', base: 0, amount: invested, fill: '#334e68', label: formatEUR(invested, 0) },
     gain >= 0
-      ? { name: 'Plus-value', base: invested, amount: gain, fill: '#10b981' }
-      : { name: 'Perte', base: finalValue, amount: -gain, fill: '#ef4444' },
-    { name: 'Valeur finale', base: 0, amount: finalValue, fill: '#486581' },
+      ? { name: 'Plus-value', base: invested, amount: gain, fill: '#10b981', label: `+${formatEUR(gain, 0)}` }
+      : { name: 'Perte', base: finalValue, amount: -gain, fill: '#ef4444', label: formatEUR(gain, 0) },
+    { name: 'Valeur finale', base: 0, amount: finalValue, fill: '#486581', label: formatEUR(finalValue, 0) },
   ]
 
   return (
@@ -177,13 +178,20 @@ export default function ResultsCharts({ result }) {
       </div>
 
       {/* 4) Waterfall : investi vs gains */}
-      <ChartCard title="Décomposition : investi vs gains" subtitle="Du capital investi à la valeur finale" height={260}>
-        <BarChart data={waterfallData} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
+      <ChartCard
+        title="Décomposition : investi vs gains"
+        subtitle="La plus-value est l'écart entre le capital investi et la valeur finale"
+        height={260}
+      >
+        <BarChart data={waterfallData} margin={{ top: 24, right: 5, left: 0, bottom: 0 }}>
           <CartesianGrid stroke={GRID} vertical={false} />
           <XAxis dataKey="name" tick={AXIS} axisLine={false} tickLine={false} />
           <YAxis tickFormatter={shortEUR} tick={AXIS} width={48} axisLine={false} tickLine={false} />
           <RTooltip
-            formatter={(v, n) => (n === 'base' ? null : [formatEUR(v), 'Montant'])}
+            cursor={{ fill: '#94a3b822' }}
+            formatter={(v, n, item) =>
+              n === 'base' ? null : [item?.payload?.label ?? formatEUR(v), item?.payload?.name ?? 'Montant']
+            }
             contentStyle={{ fontSize: 12, borderRadius: 8 }}
           />
           <Bar dataKey="base" stackId="w" fill="transparent" />
@@ -191,6 +199,11 @@ export default function ResultsCharts({ result }) {
             {waterfallData.map((d, i) => (
               <Cell key={i} fill={d.fill} />
             ))}
+            <LabelList
+              dataKey="label"
+              position="top"
+              style={{ fontSize: 11, fontWeight: 700, fill: '#475569' }}
+            />
           </Bar>
         </BarChart>
       </ChartCard>
