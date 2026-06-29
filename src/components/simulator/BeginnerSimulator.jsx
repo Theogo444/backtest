@@ -3,10 +3,11 @@
 //  Parcours en étapes : courtier → enveloppe → actifs → montant & plan →
 //  résultat clair, avec graphique simple et phrase de synthèse.
 //
-//  Mise en page « 2 zones » explicite : à gauche VOS CHOIX (formulaire groupé
-//  sur fond teinté), à droite VOTRE RÉSULTAT. Le courtier se choisit dans un
-//  menu déroulant et renvoie vers le comparatif complet. Une aide calcule un
-//  montant mensuel à partir des revenus.
+//  Mise en page « de haut en bas » : EN HAUT les 4 étapes de configuration
+//  (formulaire groupé sur fond teinté, grille 2 colonnes sur desktop, ordre
+//  1→2→3→4), PLUS BAS le résultat en pleine largeur. Le courtier se choisit
+//  dans un menu déroulant et renvoie vers le comparatif complet. Une aide
+//  calcule un montant mensuel à partir des revenus.
 //
 //  Réutilise le moteur du simulateur avancé (useSimulation) et le calcul fiscal
 //  (compareEnvelopes). Les frais du courtier choisi alimentent le moteur.
@@ -220,21 +221,21 @@ export default function BeginnerSimulator({ marketData }) {
           <Rocket size={26} /> Simulateur débutant
         </h1>
         <p className="mt-1 text-sm text-navy-500 dark:text-navy-400">
-          En 4 étapes simples, voyez ce que votre épargne aurait pu devenir. Choisissez à gauche, votre
-          résultat s'actualise tout seul à droite.
+          En 4 étapes simples, voyez ce que votre épargne aurait pu devenir. Remplissez les étapes
+          ci-dessous : votre résultat apparaît juste en dessous et s'actualise tout seul.
         </p>
       </header>
 
-      <div className="grid gap-5 lg:grid-cols-5">
-        {/* ============================ VOS CHOIX ============================ */}
-        <div className="lg:col-span-2">
-          <ZoneHeader
-            kicker="Vos choix"
-            title="Configurez votre simulation"
-            hint="Renseignez les 4 étapes ci-dessous. Votre résultat apparaît à droite (plus bas sur mobile)."
-            tone="form"
-          />
-          <div className="space-y-3 rounded-3xl bg-navy-100/50 p-3 ring-1 ring-navy-100 dark:bg-navy-900/40 dark:ring-navy-800 sm:p-4">
+      {/* ======================= EN HAUT : LES 4 ÉTAPES ======================= */}
+      <div className="mb-8">
+        <ZoneHeader
+          kicker="Étape par étape"
+          title="1. Configurez votre simulation"
+          hint="Renseignez les 4 étapes ci-dessous. Votre résultat s'affiche juste après, frais et impôts déduits."
+          tone="form"
+        />
+        <div className="rounded-3xl bg-navy-100/50 p-3 ring-1 ring-navy-100 dark:bg-navy-900/40 dark:ring-navy-800 sm:p-4">
+          <div className="grid gap-3 lg:grid-cols-2 lg:items-start">
             {/* Étape 1 — Courtier (menu déroulant) */}
             <div className="card">
               <StepTitle n={1} title="Choisissez votre courtier" />
@@ -281,16 +282,6 @@ export default function BeginnerSimulator({ marketData }) {
                 Frais indicatifs ({FEES_AS_OF}), à vérifier sur le site du courtier.
               </p>
             </div>
-
-            {/* Invitation : recevoir le comparatif par email */}
-            <EmailCapture
-              variant="compact"
-              dense
-              source="simulator_beginner_broker"
-              leadMagnet="le comparatif PEA 2026"
-              title="Recevez le comparatif (PDF)"
-              subtitle="Frais, ETF et pièges à éviter pour bien choisir votre courtier."
-            />
 
             {/* Étape 2 — Enveloppe */}
             <div className="card">
@@ -423,17 +414,28 @@ export default function BeginnerSimulator({ marketData }) {
               </p>
             </div>
           </div>
-        </div>
 
-        {/* ============================ VOTRE RÉSULTAT ============================ */}
-        <div className="lg:col-span-3">
-          <ZoneHeader
-            kicker="Votre résultat"
-            title="Ce que votre épargne aurait donné"
-            hint="Actualisé automatiquement à chaque changement, frais et impôts déduits."
-            tone="result"
+          {/* Invitation : recevoir le comparatif par email (pleine largeur) */}
+          <EmailCapture
+            variant="compact"
+            source="simulator_beginner_broker"
+            leadMagnet="le comparatif PEA 2026"
+            title="Recevez le comparatif des courtiers (PDF)"
+            subtitle="Frais, ETF et pièges à éviter pour bien choisir votre courtier."
+            className="mt-3"
           />
-          {loading ? (
+        </div>
+      </div>
+
+      {/* ======================= PLUS BAS : LE RÉSULTAT ======================= */}
+      <div>
+        <ZoneHeader
+          kicker="Votre résultat"
+          title="2. Ce que votre épargne aurait donné"
+          hint="Actualisé automatiquement à chaque changement, frais et impôts déduits."
+          tone="result"
+        />
+        {loading ? (
             <div className="card h-64 animate-pulse" />
           ) : !summary ? (
             <div className="card flex items-start gap-3 text-sm text-navy-500">
@@ -471,7 +473,6 @@ export default function BeginnerSimulator({ marketData }) {
             </div>
           )}
         </div>
-      </div>
     </section>
   )
 }
