@@ -10,7 +10,7 @@
 //  Frais INDICATIFS à jour de juin 2026 (cf. data/brokers.js). Aucune note maison.
 // ============================================================================
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Scale, Check, X, ArrowRight, ExternalLink, Info, Sparkles, Wallet,
@@ -38,6 +38,15 @@ const FILTERS = [
 export default function BrokerComparator() {
   const [filter, setFilter] = useState('all')
   const brokers = filter === 'all' ? BROKERS : BROKERS.filter((b) => b.accounts.includes(filter))
+
+  // Défilement vers le courtier ciblé quand on arrive via une ancre
+  // (#broker-<id>) depuis un CTA d'une autre page.
+  useEffect(() => {
+    const id = window.location.hash.replace('#', '')
+    if (!id) return
+    const el = document.getElementById(id)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [])
 
   return (
     <section>
@@ -203,7 +212,7 @@ function BrokerCard({ broker, envelope }) {
   const envMeta = ENVELOPE_META[envelope]
 
   return (
-    <div className="card flex flex-col">
+    <div id={`broker-${broker.id}`} className="card flex scroll-mt-24 flex-col">
       <div className="flex items-start justify-between gap-2">
         <div>
           <div className="flex items-center gap-2">

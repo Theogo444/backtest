@@ -312,13 +312,12 @@ export default function Home() {
                 ))}
               </ul>
               <div className="mt-3 text-xs text-navy-400">Frais : {b.fees}</div>
-              <a
-                href={b.url}
-                rel="sponsored nofollow"
+              <Link
+                to={`/comparatif-courtiers#broker-${b.id}`}
                 className="btn-primary mt-3 w-full"
               >
-                Ouvrir mon {b.envelope} <ArrowRight size={16} />
-              </a>
+                Voir l'offre {b.name} <ArrowRight size={16} />
+              </Link>
             </div>
           ))}
         </div>
@@ -328,8 +327,8 @@ export default function Home() {
           </Link>
         </div>
         <p className="mt-3 text-center text-xs text-navy-400">
-          Certains liens sont des partenariats : ouvrir un compte via ces liens peut nous rémunérer,
-          sans surcoût pour vous. Cela n'influence pas notre sélection.
+          Comparez les frais et les programmes de chaque courtier avant d'ouvrir un compte.
+          Certains partenariats peuvent nous rémunérer, sans surcoût pour vous, et n'influencent pas notre sélection.
         </p>
       </section>
 

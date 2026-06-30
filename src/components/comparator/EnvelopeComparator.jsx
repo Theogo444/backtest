@@ -3,7 +3,8 @@
 // ============================================================================
 
 import { useState } from 'react'
-import { Scale, ExternalLink, Info, ArrowRight } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Scale, ArrowRight, Info } from 'lucide-react'
 import {
   ResponsiveContainer,
   BarChart,
@@ -21,25 +22,25 @@ import { formatEUR, formatPct } from '../../utils/metrics'
 
 const ENVELOPE_COLORS = { pea: '#1e3a5f', cto: '#d97706', av: '#0891b2' }
 
-// Liens d'affiliation (placeholders — à remplacer par les vrais liens)
+// Courtiers mis en avant — chaque CTA renvoie vers sa fiche dans le comparatif.
 const BROKERS = [
   {
+    id: 'fortuneo',
     name: 'Fortuneo',
     tag: 'PEA',
     desc: 'PEA sans frais de tenue de compte, courtage compétitif.',
-    href: '#affiliate-fortuneo', // <!-- Remplacer par lien affilié Fortuneo -->
   },
   {
-    name: 'Boursorama',
+    id: 'boursobank',
+    name: 'BoursoBank',
     tag: 'PEA + CTO',
     desc: 'Banque en ligne complète : PEA et compte-titres.',
-    href: '#affiliate-boursorama', // <!-- Remplacer par lien affilié Boursorama -->
   },
   {
+    id: 'linxea',
     name: 'Linxea',
     tag: 'Assurance-vie',
     desc: 'Assurances-vie en ligne à frais réduits, large choix d\'ETF.',
-    href: '#affiliate-linxea', // <!-- Remplacer par lien affilié Linxea -->
   },
 ]
 
@@ -220,15 +221,14 @@ export default function EnvelopeComparator({ config, marketData }) {
                 </span>
               </div>
               <p className="mb-3 flex-1 text-xs leading-relaxed text-navy-500">{b.desc}</p>
-              {/* Remplacer par le lien affilié correspondant */}
-              <a href={b.href} target="_blank" rel="nofollow sponsored noopener noreferrer" className="btn-primary w-full text-sm">
-                Découvrir {b.name} <ExternalLink size={14} />
-              </a>
+              <Link to={`/comparatif-courtiers#broker-${b.id}`} className="btn-primary w-full text-sm">
+                Voir l'offre {b.name} <ArrowRight size={14} />
+              </Link>
             </div>
           ))}
         </div>
         <p className="mt-3 flex items-center gap-1 text-[11px] text-navy-400">
-          <ArrowRight size={12} /> Liens partenaires. Ce site peut percevoir une commission sans surcoût pour vous.
+          <ArrowRight size={12} /> Détail des frais et programmes dans le comparatif des courtiers.
         </p>
       </div>
     </PageShell>

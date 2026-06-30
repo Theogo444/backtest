@@ -115,11 +115,11 @@ export default function GuideArticle() {
               </li>
             ))}
           </ul>
-          <a href={broker.url} rel="sponsored nofollow" className="btn-primary mt-3">
-            Ouvrir un {broker.envelope} <ArrowRight size={16} />
-          </a>
+          <Link to={`/comparatif-courtiers#broker-${broker.id}`} className="btn-primary mt-3">
+            Voir l'offre {broker.name} <ArrowRight size={16} />
+          </Link>
           <p className="mt-2 text-[11px] text-navy-400">
-            Lien partenaire — sans surcoût pour vous. N'influence pas notre sélection.
+            Comparez les frais avant d'ouvrir. N'influence pas notre sélection.
           </p>
         </aside>
 
