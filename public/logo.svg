@@ -1,8 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 248 40" role="img" aria-label="Simulateur de Portefeuille">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 40" role="img" aria-label="Sereo — Simulateur de portefeuille">
   <rect width="40" height="40" rx="10" fill="#1e3a5f"/>
-  <line x1="8" y1="31.5" x2="32" y2="31.5" stroke="#ffffff" stroke-opacity="0.18" stroke-width="1.4" stroke-linecap="round"/>
-  <path d="M8 29 L17 21 L23 25 L32 12.5" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="32" cy="12.5" r="3.4" fill="#34d399"/>
-  <text x="52" y="18.5" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="800" letter-spacing="-0.2" fill="#1e3a5f">Simulateur</text>
-  <text x="52" y="33" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="600" letter-spacing="0.2" fill="#486581">de Portefeuille</text>
+  <line x1="9" y1="26" x2="31" y2="26" stroke="#ffffff" stroke-opacity="0.2" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="20" cy="20.5" r="5" fill="#34d399"/>
+  <text x="52" y="19" font-family="Inter, system-ui, sans-serif" font-size="19" font-weight="800" letter-spacing="-0.4" fill="#1e3a5f">Sere<tspan fill="#34d399">o</tspan></text>
+  <text x="52" y="33" font-family="Inter, system-ui, sans-serif" font-size="10.5" font-weight="600" letter-spacing="0.3" fill="#486581">Simulateur de portefeuille</text>
 </svg>

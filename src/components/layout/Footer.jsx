@@ -34,7 +34,7 @@ export default function Footer() {
       </div>
 
       <p className="py-4 text-center text-xs text-navy-400">
-        © {2026} Simulateur de Portefeuille FR — Tous droits réservés.
+        © {2026} Sereo — Simulateur de portefeuille FR — Tous droits réservés.
       </p>
     </footer>
   )

@@ -5,18 +5,7 @@
 
 import { NavLink, Link } from 'react-router-dom'
 import { Home, Rocket, LineChart, Scale, Wallet, Landmark, Dices, Newspaper, BookOpen, HelpCircle, ShieldCheck, Moon, Sun } from 'lucide-react'
-
-// Marque : courbe ascendante + nœud émeraude (cohérente avec le favicon).
-function BrandMark({ className = 'h-9 w-9' }) {
-  return (
-    <svg viewBox="0 0 40 40" className={className} role="img" aria-label="Simulateur de Portefeuille">
-      <rect width="40" height="40" rx="10" fill="#1e3a5f" />
-      <line x1="8" y1="31.5" x2="32" y2="31.5" stroke="#ffffff" strokeOpacity="0.18" strokeWidth="1.4" strokeLinecap="round" />
-      <path d="M8 29 L17 21 L23 25 L32 12.5" fill="none" stroke="#34d399" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="32" cy="12.5" r="3.4" fill="#34d399" />
-    </svg>
-  )
-}
+import BrandMark from './BrandMark'
 
 export const NAV_ITEMS = [
   { to: '/', label: 'Accueil', icon: Home, end: true },
@@ -40,8 +29,8 @@ export default function Navbar({ theme, onToggleTheme }) {
         <Link to="/" className="flex items-center gap-2.5 px-6 py-5">
           <BrandMark className="h-9 w-9 shrink-0" />
           <div className="leading-tight">
-            <div className="text-sm font-extrabold tracking-tight text-navy-800 dark:text-white">Simulateur</div>
-            <div className="text-[11px] font-semibold text-navy-400">de Portefeuille</div>
+            <div className="text-base font-extrabold tracking-tight text-navy-800 dark:text-white">Sereo</div>
+            <div className="text-[11px] font-semibold text-navy-400">Simulateur de portefeuille</div>
           </div>
         </Link>
 
@@ -80,7 +69,10 @@ export default function Navbar({ theme, onToggleTheme }) {
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-navy-100 bg-white px-4 py-3 md:hidden dark:border-navy-800 dark:bg-navy-900">
         <Link to="/" className="flex items-center gap-2">
           <BrandMark className="h-8 w-8 shrink-0" />
-          <span className="text-sm font-extrabold tracking-tight text-navy-800 dark:text-white">Simulateur de Portefeuille</span>
+          <span className="leading-tight">
+            <span className="block text-base font-extrabold tracking-tight text-navy-800 dark:text-white">Sereo</span>
+            <span className="block text-[10px] font-semibold text-navy-400">Simulateur de portefeuille</span>
+          </span>
         </Link>
         <button
           onClick={onToggleTheme}
