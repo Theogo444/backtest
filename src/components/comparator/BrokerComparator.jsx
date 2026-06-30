@@ -293,7 +293,7 @@ function BrokerCard({ broker, envelope }) {
         </ul>
       </div>
 
-      <a href={broker.url} rel="sponsored nofollow" className="btn-primary mt-4 w-full">
+      <a href={broker.url} target="_blank" rel="sponsored nofollow noopener" className="btn-primary mt-4 w-full">
         Découvrir {broker.name} <ExternalLink size={15} />
       </a>
     </div>

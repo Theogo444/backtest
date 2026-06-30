@@ -3,7 +3,6 @@
 // ============================================================================
 
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { Scale, ArrowRight, Info } from 'lucide-react'
 import {
   ResponsiveContainer,
@@ -29,18 +28,21 @@ const BROKERS = [
     name: 'Fortuneo',
     tag: 'PEA',
     desc: 'PEA sans frais de tenue de compte, courtage compétitif.',
+    url: 'https://bourse.fortuneo.fr/',
   },
   {
     id: 'boursobank',
     name: 'BoursoBank',
     tag: 'PEA + CTO',
     desc: 'Banque en ligne complète : PEA et compte-titres.',
+    url: 'https://www.boursobank.com/bourse/',
   },
   {
     id: 'linxea',
     name: 'Linxea',
     tag: 'Assurance-vie',
     desc: 'Assurances-vie en ligne à frais réduits, large choix d\'ETF.',
+    url: 'https://www.linxea.com/',
   },
 ]
 
@@ -221,9 +223,14 @@ export default function EnvelopeComparator({ config, marketData }) {
                 </span>
               </div>
               <p className="mb-3 flex-1 text-xs leading-relaxed text-navy-500">{b.desc}</p>
-              <Link to={`/comparatif-courtiers#broker-${b.id}`} className="btn-primary w-full text-sm">
+              <a
+                href={b.url}
+                target="_blank"
+                rel="sponsored nofollow noopener"
+                className="btn-primary w-full text-sm"
+              >
                 Voir l'offre {b.name} <ArrowRight size={14} />
-              </Link>
+              </a>
             </div>
           ))}
         </div>

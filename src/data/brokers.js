@@ -16,7 +16,8 @@
 //  Aucune note « sur 5 » n'est affichée : nous ne publions pas de notation
 //  maison qui ne reposerait pas sur une méthodologie vérifiable.
 //
-//  Les liens `url` sont des PLACEHOLDERS d'affiliation (#affiliate-*).
+//  Les liens `url` pointent vers le site officiel de chaque courtier
+//  (non trackés) — à remplacer par tes liens d'affiliation une fois inscrit.
 // ============================================================================
 
 export const FEES_AS_OF = 'juin 2026'
@@ -42,7 +43,7 @@ export const BROKERS = [
     bestFor: 'Les frais par ordre les plus bas',
     pros: ['Parmi les courtages les moins chers', 'PEA, PEA-PME et compte-titres', 'Spécialiste français de la bourse'],
     cons: ['Interface un peu datée', "Pas d'assurance-vie"],
-    url: '#affiliate-bourse-direct',
+    url: 'https://www.boursedirect.fr/',
     offers: {
       pea: [
         { name: 'Grille Classique', orderFee: '0,99 € (≤ 500 €) → 3,80 € (≤ 4 400 €), puis 0,09 %', custodyFee: '0 €', etfDeal: '1er ordre ETF Amundi offert chaque mois' },
@@ -66,7 +67,7 @@ export const BROKERS = [
     bestFor: 'Investir un peu chaque mois sans frais, depuis son mobile',
     pros: ["PEA avec plans d'épargne automatiques sans frais", '1 €/ordre seulement', 'Application mobile très soignée'],
     cons: ['Pas de plateforme web complète', 'Tout se gère depuis le téléphone'],
-    url: '#affiliate-trade-republic',
+    url: 'https://traderepublic.com/fr-fr',
     offers: {
       pea: [
         { name: "Plan d'épargne (DCA)", orderFee: '0 € (investissement programmé automatique)', custodyFee: '0 €', etfDeal: 'DCA sur ETF sans frais de courtage' },
@@ -92,7 +93,7 @@ export const BROKERS = [
     bestFor: 'Un PEA dans une banque en ligne complète',
     pros: ['0 € de droits de garde', 'Banque en ligne complète et réputée', 'PEA et compte-titres'],
     cons: ['Courtage en pourcentage', 'Moins adapté aux très gros ordres'],
-    url: '#affiliate-fortuneo',
+    url: 'https://bourse.fortuneo.fr/',
     offers: {
       pea: [
         { name: 'Starter', orderFee: '1er ordre/mois ≤ 500 € offert, puis 0,35 % du montant', custodyFee: '0 €', etfDeal: '1er ordre ETF Amundi remboursé chaque mois' },
@@ -120,7 +121,7 @@ export const BROKERS = [
     bestFor: 'Tout au même endroit : banque, bourse et assurance-vie',
     pros: ['PEA, compte-titres et assurance-vie', 'Banque en ligne complète', '176 ETF sans frais (BoursoMarkets)'],
     cons: ['Courtage en pourcentage sur les gros ordres', 'Gratuité ETF conditionnée à 500 €'],
-    url: '#affiliate-boursobank',
+    url: 'https://www.boursobank.com/bourse/',
     offers: {
       pea: [
         { name: 'Découverte', orderFee: '1,99 € (≤ 500 €) puis ~0,60 % du montant', custodyFee: '0 €', etfDeal: '176 ETF à 0 € via BoursoMarkets (achat ≥ 500 €)' },
@@ -151,7 +152,7 @@ export const BROKERS = [
     bestFor: 'Investir sur ETF à très bas coût',
     pros: ['Courtage ETF parmi les plus bas', 'PEA et compte-titres', 'Offre PEA sans frais en 2026'],
     cons: ['Plateforme dense pour un débutant', 'Frais de change 0,25 % sur devises'],
-    url: '#affiliate-saxo',
+    url: 'https://www.home.saxo/fr-fr',
     offers: {
       pea: [
         { name: 'PEA sans frais 2026', orderFee: '0 € de courtage en 2026 (70 actions PEA + sélection d’ETF)', custodyFee: '0 €', etfDeal: 'Transfert de PEA remboursé + 70 actions offertes' },
@@ -176,7 +177,7 @@ export const BROKERS = [
     bestFor: 'Un très large choix d’ETF à bas coût',
     pros: ['Frais très bas', 'Univers d’ETF parmi les plus larges', 'Courtier européen établi'],
     cons: ['Pas de PEA (compte-titres uniquement)', 'Déclaration fiscale à faire soi-même'],
-    url: '#affiliate-degiro',
+    url: 'https://www.degiro.fr/',
     offers: {
       cto: [
         { name: 'Tarif unique', orderFee: '1 €/ordre Euronext · autres ETF 3 €', custodyFee: '0 €', etfDeal: 'Sélection d’ETF « core » à 1 € par transaction' },
@@ -197,7 +198,7 @@ export const BROKERS = [
     bestFor: 'Investir sans frais de courtage',
     pros: ['0 commission sur actions et ETF', 'Investissement fractionné', 'Application simple'],
     cons: ['Pas de PEA (compte-titres uniquement)', 'Frais de change 0,15 %', 'Courtier étranger : déclaration 3916'],
-    url: '#affiliate-trading212',
+    url: 'https://www.trading212.com/fr',
     offers: {
       cto: [
         { name: 'Invest (sans commission)', orderFee: '0 € de commission sur actions et ETF', custodyFee: '0 €', etfDeal: 'Actions et ETF sans commission, investissement fractionné' },
@@ -218,7 +219,7 @@ export const BROKERS = [
     bestFor: 'Une assurance-vie en ligne à frais réduits',
     pros: ['0 € de frais sur versement', '0,5 %/an seulement (Linxea Spirit 2)', 'Large choix d’ETF et de SCPI'],
     cons: ["Frais de gestion annuels (propres à l'AV)"],
-    url: '#affiliate-linxea',
+    url: 'https://www.linxea.com/',
     offers: {
       av: [
         { name: 'Linxea Spirit 2', orderFee: '0 € sur versement · 0,06 % par arbitrage ETF', custodyFee: '0,5 %/an (frais de gestion)', etfDeal: '80+ ETF et SCPI éligibles' },
@@ -240,7 +241,7 @@ export const BROKERS = [
     bestFor: 'Se faire gérer son épargne clé en main',
     pros: ['Gestion pilotée automatique', 'Aucune décision à prendre', 'Idéal « mains libres »'],
     cons: ['Frais annuels plus élevés', 'Moins de contrôle sur les choix'],
-    url: '#affiliate-yomoni',
+    url: 'https://www.yomoni.fr/',
     offers: {
       av: [
         { name: 'Gestion pilotée', orderFee: 'Aucun ordre à passer (gestion pilotée)', custodyFee: '≈ 1,6 %/an tout compris', etfDeal: 'Portefeuille d’ETF géré automatiquement pour vous' },

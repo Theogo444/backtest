@@ -312,12 +312,14 @@ export default function Home() {
                 ))}
               </ul>
               <div className="mt-3 text-xs text-navy-400">Frais : {b.fees}</div>
-              <Link
-                to={`/comparatif-courtiers#broker-${b.id}`}
+              <a
+                href={b.url}
+                target="_blank"
+                rel="sponsored nofollow noopener"
                 className="btn-primary mt-3 w-full"
               >
                 Voir l'offre {b.name} <ArrowRight size={16} />
-              </Link>
+              </a>
             </div>
           ))}
         </div>
