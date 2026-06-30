@@ -3,10 +3,14 @@
 // ============================================================================
 
 import { Link } from 'react-router-dom'
+import Logo from './Logo'
 
 export default function Footer() {
   return (
     <footer className="mt-10 border-t border-navy-100 pt-6 dark:border-navy-800">
+      <Link to="/" className="inline-flex px-1 py-2" aria-label="Sereo — accueil">
+        <Logo variant="compact" size="sm" />
+      </Link>
       <div className="grid gap-6 px-1 py-6 text-sm text-navy-500 md:grid-cols-2">
         <div>
           <h3 className="mb-2 font-bold text-navy-700 dark:text-navy-200">Confidentialité</h3>

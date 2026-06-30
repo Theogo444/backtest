@@ -5,7 +5,7 @@
 
 import { NavLink, Link } from 'react-router-dom'
 import { Home, Rocket, LineChart, Scale, Wallet, Landmark, Dices, Newspaper, BookOpen, HelpCircle, ShieldCheck, Moon, Sun } from 'lucide-react'
-import BrandMark from './BrandMark'
+import Logo from './Logo'
 
 export const NAV_ITEMS = [
   { to: '/', label: 'Accueil', icon: Home, end: true },
@@ -26,12 +26,8 @@ export default function Navbar({ theme, onToggleTheme }) {
     <>
       {/* ---------- Sidebar desktop ---------- */}
       <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 md:border-r md:border-navy-100 md:bg-white dark:md:border-navy-800 dark:md:bg-navy-900">
-        <Link to="/" className="flex items-center gap-2.5 px-6 py-5">
-          <BrandMark className="h-9 w-9 shrink-0" />
-          <div className="leading-tight">
-            <div className="text-base font-extrabold tracking-tight text-navy-800 dark:text-white">Sereo</div>
-            <div className="text-[11px] font-semibold text-navy-400">Simulateur de portefeuille</div>
-          </div>
+        <Link to="/" className="flex items-center px-6 py-5" aria-label="Sereo — accueil">
+          <Logo variant="default" size="md" />
         </Link>
 
         <nav className="flex-1 space-y-1 px-3 py-2">
@@ -67,12 +63,8 @@ export default function Navbar({ theme, onToggleTheme }) {
 
       {/* ---------- Header mobile ---------- */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-navy-100 bg-white px-4 py-3 md:hidden dark:border-navy-800 dark:bg-navy-900">
-        <Link to="/" className="flex items-center gap-2">
-          <BrandMark className="h-8 w-8 shrink-0" />
-          <span className="leading-tight">
-            <span className="block text-base font-extrabold tracking-tight text-navy-800 dark:text-white">Sereo</span>
-            <span className="block text-[10px] font-semibold text-navy-400">Simulateur de portefeuille</span>
-          </span>
+        <Link to="/" className="flex items-center" aria-label="Sereo — accueil">
+          <Logo variant="compact" size="sm" />
         </Link>
         <button
           onClick={onToggleTheme}
