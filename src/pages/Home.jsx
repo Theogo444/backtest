@@ -9,7 +9,7 @@ import { Head } from 'vite-react-ssg'
 import { Link } from 'react-router-dom'
 import {
   Rocket, LineChart, Scale, Landmark, Dices, ArrowRight, ShieldCheck,
-  PiggyBank, Wallet, Clock, Check, Database, BadgeCheck, Sparkles,
+  PiggyBank, Wallet, Clock, Check, Database, BadgeCheck, Sparkles, BookOpen,
 } from 'lucide-react'
 import EmailCapture from '../components/marketing/EmailCapture'
 import { BROKERS } from '../data/affiliates'
@@ -176,6 +176,29 @@ export default function Home() {
           <HeroPreview />
         </div>
       </section>
+
+      {/* ------------------------- Bandeau guides ------------------------- */}
+      <Link
+        to="/guides"
+        className="card-link group mt-4 flex flex-col items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-emerald-500/20 dark:bg-emerald-500/10"
+      >
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-300">
+            <BookOpen size={20} />
+          </span>
+          <div>
+            <p className="font-bold text-navy-800 dark:text-white">
+              Débuter sereinement : tous nos guides pas à pas
+            </p>
+            <p className="text-sm text-navy-500 dark:text-navy-300">
+              PEA ou CTO, choisir ses ETF, investir en DCA… des articles clairs pour partir du bon pied.
+            </p>
+          </div>
+        </div>
+        <span className="inline-flex shrink-0 items-center gap-1.5 font-semibold text-emerald-600 group-hover:gap-2.5 dark:text-emerald-300">
+          Lire les guides <ArrowRight size={16} className="transition-all" />
+        </span>
+      </Link>
 
       {/* --------------------------- Outils (produit en avant) --------------------------- */}
       <section className="mt-12">
