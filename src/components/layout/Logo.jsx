@@ -28,12 +28,13 @@ const VARIANTS = {
   dark: { glyph: true, text: true, desc: true, tone: 'dark' },
 }
 
-// Couleurs par tonalité. emerald-500 sur clair (meilleur contraste du « o »),
-// emerald-300 sur sombre ; le mark, lui, porte toujours l'émeraude #34d399.
+// Wordmark monochrome (discipline chromatique : le seul accent émeraude du
+// logo vit dans le mark, pas dans le texte). Nom contrasté + descripteur en
+// petites capitales espacées (registre éditorial).
 const TONE = {
-  auto: { name: 'text-navy-800 dark:text-white', desc: 'text-navy-400', accent: 'text-emerald-500 dark:text-emerald-300' },
-  light: { name: 'text-navy-800', desc: 'text-navy-400', accent: 'text-emerald-500' },
-  dark: { name: 'text-white', desc: 'text-navy-200', accent: 'text-emerald-300' },
+  auto: { name: 'text-navy-900 dark:text-white', desc: 'text-navy-400' },
+  light: { name: 'text-navy-900', desc: 'text-navy-400' },
+  dark: { name: 'text-white', desc: 'text-navy-300' },
 }
 
 export default function Logo({ variant = 'default', size = 'md', className = '' }) {
@@ -48,10 +49,10 @@ export default function Logo({ variant = 'default', size = 'md', className = '' 
       {v.text && (
         <span className="leading-tight">
           <span className={`block font-extrabold tracking-tight ${s.name} ${tone.name}`}>
-            Sere<span className={tone.accent}>o</span>
+            Sereo
           </span>
           {v.desc && (
-            <span className={`block font-semibold ${s.desc} ${tone.desc}`}>
+            <span className={`block font-semibold uppercase tracking-[0.14em] ${s.desc} ${tone.desc}`}>
               Simulateur de portefeuille
             </span>
           )}
