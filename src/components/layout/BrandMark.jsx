@@ -63,15 +63,21 @@ export default function BrandMark({ className = 'h-9 w-9', decorative = false })
   )
 }
 
-/** Glyphe nu (sans carré) pour surfaces sombres/colorées. */
+/**
+ * Glyphe nu (sans carré) — MARK PRIMAIRE du logo (navbar, footer, lockup).
+ * Adaptatif : les éléments atténués héritent de `currentColor` (encre navy
+ * sur fond clair, blanc sur fond sombre — piloté par la classe de couleur
+ * passée par Logo) ; le point focal reste émeraude sur toutes les surfaces.
+ * Le carré arrondi (BrandMark) est désormais réservé à l'app icon / favicon.
+ */
 export function BrandGlyph({ className = 'h-9 w-9', decorative = false }) {
   return (
     <svg viewBox="0 0 40 40" className={className} {...a11y(decorative)}>
       <Plot
-        base={{ stroke: '#ffffff', strokeOpacity: 0.4, strokeWidth: 1.6 }}
-        stem={{ stroke: '#ffffff', strokeOpacity: 0.32, strokeWidth: 1.4 }}
-        dot={{ fill: '#ffffff', fillOpacity: 0.92 }}
-        focal={{ stem: { stroke: EMERALD, strokeOpacity: 0.55, strokeWidth: 1.4 }, dot: { fill: EMERALD } }}
+        base={{ stroke: 'currentColor', strokeOpacity: 0.28, strokeWidth: 1.6 }}
+        stem={{ stroke: 'currentColor', strokeOpacity: 0.3, strokeWidth: 1.4 }}
+        dot={{ fill: 'currentColor', fillOpacity: 0.62 }}
+        focal={{ stem: { stroke: EMERALD, strokeOpacity: 0.5, strokeWidth: 1.4 }, dot: { fill: EMERALD } }}
       />
     </svg>
   )
