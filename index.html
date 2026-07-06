@@ -17,10 +17,34 @@
     <meta property="og:site_name" content="Sereo" />
     <meta name="twitter:card" content="summary_large_image" />
 
+    <!-- Vérification Google Search Console : coller ici la balise fournie par
+         Google (méthode « balise HTML ») puis rebuilder/déployer, ex. :
+         <meta name="google-site-verification" content="CODE_FOURNI_PAR_GOOGLE" /> -->
+
     <!-- Police Inter auto-hébergée (@fontsource, importée dans src/main.jsx) :
          aucune requête vers Google Fonts (RGPD + performance). -->
 
-    <!-- Données structurées schema.org : application web -->
+    <!-- Données structurées schema.org (URL canonique : cf. src/config/site.js).
+         WebSite.name = « nom de site » affiché par Google dans les résultats. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Sereo",
+        "alternateName": ["Sereo — Simulateur de portefeuille", "Simulateur de Portefeuille FR"],
+        "url": "https://simulateur-portefeuille.fr/",
+        "inLanguage": "fr-FR"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Sereo",
+        "url": "https://simulateur-portefeuille.fr/",
+        "logo": "https://simulateur-portefeuille.fr/icon-512.png"
+      }
+    </script>
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",

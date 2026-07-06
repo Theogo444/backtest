@@ -8,6 +8,7 @@ import { marked } from 'marked'
 import { Clock, ChevronRight, ArrowRight, ShieldCheck, LineChart } from 'lucide-react'
 import Seo from '../components/Seo'
 import EmailCapture from '../components/marketing/EmailCapture'
+import { SITE_URL, BRAND } from '../config/site'
 import { getGuide, GUIDES } from '../data/guides'
 import { BROKERS } from '../data/affiliates'
 
@@ -27,7 +28,7 @@ export default function GuideArticle() {
   const html = marked.parse(guide.body)
   const broker = BROKERS.find((b) => b.envelope === 'PEA') || BROKERS[0]
   const related = GUIDES.filter((g) => g.slug !== guide.slug).slice(0, 2)
-  const url = `https://simulateur-portefeuille.fr/guides/${guide.slug}`
+  const url = `${SITE_URL}/guides/${guide.slug}`
 
   // Lead magnet contextualisé selon le sujet de l'article.
   const topic = `${guide.category} ${guide.title}`.toLowerCase()
@@ -47,8 +48,8 @@ export default function GuideArticle() {
     datePublished: guide.date,
     inLanguage: 'fr-FR',
     mainEntityOfPage: url,
-    author: { '@type': 'Organization', name: 'Sereo', url: 'https://simulateur-portefeuille.fr' },
-    publisher: { '@type': 'Organization', name: 'Sereo', url: 'https://simulateur-portefeuille.fr' },
+    author: { '@type': 'Organization', name: BRAND, url: SITE_URL },
+    publisher: { '@type': 'Organization', name: BRAND, url: SITE_URL },
   }
 
   // Fil d'Ariane structuré (miroir du fil d'Ariane visuel ci-dessous).
@@ -56,8 +57,8 @@ export default function GuideArticle() {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Accueil', item: 'https://simulateur-portefeuille.fr/' },
-      { '@type': 'ListItem', position: 2, name: 'Guides', item: 'https://simulateur-portefeuille.fr/guides' },
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Guides', item: `${SITE_URL}/guides` },
       { '@type': 'ListItem', position: 3, name: guide.title, item: url },
     ],
   }

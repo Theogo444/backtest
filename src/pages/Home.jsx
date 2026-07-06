@@ -430,8 +430,8 @@ export default function Home() {
           <p>
             <strong>Enfin les frais.</strong> Quelques dixièmes de pour cent de frais par an, sur
             20 ans, peuvent coûter plusieurs milliers d'euros. Choisir un courtier à frais réduits
-            et des ETF peu coûteux fait une vraie différence. Utilisez nos outils pour tout tester
-            avant d'investir — gratuitement et sans inscription.
+            et des ETF peu coûteux fait une vraie différence. Les outils de <strong>Sereo</strong>{' '}
+            vous permettent de tout tester avant d'investir — gratuitement et sans inscription.
           </p>
         </div>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row">

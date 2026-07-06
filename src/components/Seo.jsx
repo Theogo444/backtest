@@ -11,9 +11,8 @@
 // ============================================================================
 
 import { Head } from 'vite-react-ssg'
+import { SITE_URL as SITE, BRAND } from '../config/site'
 
-const SITE = 'https://simulateur-portefeuille.fr'
-const BRAND = 'Sereo'
 const OG_IMAGE = `${SITE}/og-image.jpg`
 const OG_IMAGE_ALT = 'Sereo — simulateur de portefeuille : PEA, CTO, assurance-vie'
 

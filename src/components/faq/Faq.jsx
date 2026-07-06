@@ -186,6 +186,10 @@ const CATEGORIES = [
     icon: ShieldCheck,
     questions: [
       {
+        q: "Qu'est-ce que Sereo ?",
+        a: "Sereo est un simulateur de portefeuille gratuit pour investisseurs particuliers français. Il permet de backtester des stratégies d'investissement (DCA, lump sum, value averaging…) sur environ 25 ans de données de marché réelles, de comparer la fiscalité du PEA, du compte-titres et de l'assurance-vie, de comparer les frais des courtiers et de préparer sa retraite. Tout fonctionne dans votre navigateur, sans inscription.",
+      },
+      {
         q: "Ce site donne-t-il des conseils en investissement personnalisés ?",
         a: "Non. Ce site est un outil pédagogique et de simulation. Il ne constitue pas un conseil en investissement personnalisé ni une recommandation d'achat. Pour une décision adaptée à votre situation personnelle, rapprochez-vous d'un conseiller financier agréé.",
       },

@@ -1,4 +1,4 @@
-# robots.txt — accès permissif pour le référencement
+# robots.txt — généré au build (scripts/generate-sitemap.mjs)
 User-agent: *
 Allow: /
 

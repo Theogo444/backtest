@@ -1,6 +1,7 @@
 // ============================================================================
-//  generate-sitemap.mjs — génère public/sitemap.xml au build.
-//  Les pages statiques sont listées ici ; les guides sont découverts
+//  generate-sitemap.mjs — génère public/sitemap.xml ET public/robots.txt au
+//  build (URL canonique lue dans src/config/site.js : ne pas les éditer à la
+//  main). Les pages statiques sont listées ici ; les guides sont découverts
 //  automatiquement dans src/content/guides/*.js (slug + date réels).
 //  Ajouter un guide = déposer un fichier : il apparaît dans le sitemap.
 //  Lancé avant `vite-react-ssg build` (cf. package.json) puis copié dans dist/.
@@ -9,10 +10,10 @@
 import { readdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { SITE_URL as SITE } from '../src/config/site.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
-const SITE = 'https://simulateur-portefeuille.fr'
 
 // Pages statiques (mêmes chemins que les routes pré-rendues).
 const STATIC_ROUTES = [
@@ -69,3 +70,14 @@ const xml =
 
 await writeFile(path.join(ROOT, 'public/sitemap.xml'), xml, 'utf8')
 console.log(`✓ sitemap.xml généré : ${urls.length} URLs (${guides.length} guides).`)
+
+// robots.txt — généré au même endroit pour que l'URL du sitemap suive
+// automatiquement l'URL canonique du site.
+const robots = `# robots.txt — généré au build (scripts/generate-sitemap.mjs)
+User-agent: *
+Allow: /
+
+Sitemap: ${SITE}/sitemap.xml
+`
+await writeFile(path.join(ROOT, 'public/robots.txt'), robots, 'utf8')
+console.log('✓ robots.txt généré.')
