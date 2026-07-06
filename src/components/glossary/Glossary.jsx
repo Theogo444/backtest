@@ -2,7 +2,8 @@
 //  Glossary.jsx — glossaire au format accordéon (FAQ) + schema.org FAQPage
 // ============================================================================
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { Head } from 'vite-react-ssg'
 import { BookOpen, ChevronDown, Search } from 'lucide-react'
 
 // Définitions pédagogiques (terme → définition)
@@ -81,26 +82,17 @@ export default function Glossary() {
   const [open, setOpen] = useState(0)
   const [query, setQuery] = useState('')
 
-  // Injecte le balisage schema.org FAQPage (SEO) dans le <head>
-  useEffect(() => {
-    const script = document.createElement('script')
-    script.type = 'application/ld+json'
-    script.id = 'faq-schema'
-    script.textContent = JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: TERMS.map((t) => ({
-        '@type': 'Question',
-        name: t.term,
-        acceptedAnswer: { '@type': 'Answer', text: t.def },
-      })),
-    })
-    document.head.appendChild(script)
-    return () => {
-      const el = document.getElementById('faq-schema')
-      if (el) el.remove()
-    }
-  }, [])
+  // Balisage schema.org FAQPage — via <Head> pour être présent dans le HTML
+  // pré-rendu (les crawlers le voient sans exécuter le JavaScript).
+  const faqSchema = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: TERMS.map((t) => ({
+      '@type': 'Question',
+      name: t.term,
+      acceptedAnswer: { '@type': 'Answer', text: t.def },
+    })),
+  })
 
   const filtered = TERMS.filter(
     (t) =>
@@ -111,6 +103,9 @@ export default function Glossary() {
 
   return (
     <section>
+      <Head>
+        <script type="application/ld+json">{faqSchema}</script>
+      </Head>
       <header className="mb-5">
         <h1 className="flex items-center gap-2 text-2xl font-extrabold text-navy-800 dark:text-white md:text-3xl">
           <BookOpen size={26} /> Glossaire de l'investisseur

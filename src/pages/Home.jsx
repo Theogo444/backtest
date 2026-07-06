@@ -5,12 +5,12 @@
 //  / panneau teinté) pour éviter l'effet « suite uniforme de cartes ».
 // ============================================================================
 
-import { Head } from 'vite-react-ssg'
 import { Link } from 'react-router-dom'
 import {
   Rocket, LineChart, Scale, Landmark, Dices, ArrowRight, ShieldCheck,
   PiggyBank, Wallet, Clock, Check, Database, BadgeCheck, Sparkles, BookOpen,
 } from 'lucide-react'
+import Seo from '../components/Seo'
 import EmailCapture from '../components/marketing/EmailCapture'
 import { BROKERS } from '../data/affiliates'
 import { GUIDES } from '../data/guides'
@@ -134,14 +134,11 @@ function HeroPreview() {
 export default function Home() {
   return (
     <>
-      <Head>
-        <title>Investir efficacement en France : PEA, CTO, Assurance-vie | Guide & outils gratuits</title>
-        <meta
-          name="description"
-          content="Apprenez à investir efficacement en France. Outils gratuits pour backtester vos stratégies, comparer PEA / CTO / Assurance-vie et préparer votre retraite."
-        />
-        <link rel="canonical" href="https://simulateur-portefeuille.fr/" />
-      </Head>
+      <Seo
+        title="Sereo — Simulateur de portefeuille : PEA, CTO, assurance-vie"
+        description="Apprenez à investir efficacement en France. Outils gratuits pour backtester vos stratégies, comparer PEA / CTO / Assurance-vie et préparer votre retraite."
+        path="/"
+      />
 
       {/* ----------------------------- Hero ----------------------------- */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-navy-800 to-navy-950 text-white ring-1 ring-navy-800">

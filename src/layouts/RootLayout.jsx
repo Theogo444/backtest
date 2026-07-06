@@ -79,10 +79,17 @@ export default function RootLayout() {
 
   return (
     <div className="min-h-screen">
+      {/* Lien d'évitement (a11y) : premier élément focusable, visible au clavier. */}
+      <a
+        href="#contenu"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-navy-800 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-card-hover"
+      >
+        Aller au contenu
+      </a>
       <Navbar theme={theme} onToggleTheme={toggleTheme} />
 
       <div className="md:pl-64">
-        <main className="mx-auto max-w-6xl px-4 pb-24 pt-4 md:px-8 md:pb-10">
+        <main id="contenu" className="mx-auto max-w-6xl px-4 pb-24 pt-4 md:px-8 md:pb-10">
           <div className="animate-fade-in">
             <Outlet context={shared} />
           </div>

@@ -4,7 +4,7 @@
 // ============================================================================
 
 import { NavLink, Link } from 'react-router-dom'
-import { Home, Rocket, LineChart, Scale, Wallet, Landmark, Dices, Newspaper, BookOpen, HelpCircle, ShieldCheck, Moon, Sun } from 'lucide-react'
+import { Home, Rocket, LineChart, Scale, Wallet, Landmark, Dices, Newspaper, BookOpen, HelpCircle, Moon, Sun } from 'lucide-react'
 import Logo from './Logo'
 
 export const NAV_ITEMS = [
@@ -18,7 +18,6 @@ export const NAV_ITEMS = [
   { to: '/guides', label: 'Guides', icon: Newspaper },
   { to: '/glossaire', label: 'Glossaire', icon: BookOpen },
   { to: '/faq', label: 'FAQ', icon: HelpCircle },
-  { to: '/confidentialite', label: 'Confidentialité', icon: ShieldCheck },
 ]
 
 export default function Navbar({ theme, onToggleTheme }) {

@@ -1,4 +1,4 @@
-# Simulateur de Portefeuille — PEA, CTO, Assurance-vie 🇫🇷
+# Sereo — Simulateur de portefeuille (PEA, CTO, Assurance-vie) 🇫🇷
 
 Site de **simulation et backtest de portefeuille d'investissement** pour particuliers français.
 Entièrement côté client (aucun backend), prêt à déployer sur **Vercel**.

@@ -3,10 +3,10 @@
 //  Le contenu Markdown est converti en HTML (marked) — baké au pré-rendu.
 // ============================================================================
 
-import { Head } from 'vite-react-ssg'
 import { Link, useParams, Navigate } from 'react-router-dom'
 import { marked } from 'marked'
 import { Clock, ChevronRight, ArrowRight, ShieldCheck, LineChart } from 'lucide-react'
+import Seo from '../components/Seo'
 import EmailCapture from '../components/marketing/EmailCapture'
 import { getGuide, GUIDES } from '../data/guides'
 import { BROKERS } from '../data/affiliates'
@@ -47,22 +47,32 @@ export default function GuideArticle() {
     datePublished: guide.date,
     inLanguage: 'fr-FR',
     mainEntityOfPage: url,
-    author: { '@type': 'Organization', name: 'Simulateur de Portefeuille FR' },
-    publisher: { '@type': 'Organization', name: 'Simulateur de Portefeuille FR' },
+    author: { '@type': 'Organization', name: 'Sereo', url: 'https://simulateur-portefeuille.fr' },
+    publisher: { '@type': 'Organization', name: 'Sereo', url: 'https://simulateur-portefeuille.fr' },
+  }
+
+  // Fil d'Ariane structuré (miroir du fil d'Ariane visuel ci-dessous).
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: 'https://simulateur-portefeuille.fr/' },
+      { '@type': 'ListItem', position: 2, name: 'Guides', item: 'https://simulateur-portefeuille.fr/guides' },
+      { '@type': 'ListItem', position: 3, name: guide.title, item: url },
+    ],
   }
 
   return (
     <>
-      <Head>
-        <title>{`${guide.title} | Simulateur de Portefeuille FR`}</title>
-        <meta name="description" content={guide.description} />
-        <link rel="canonical" href={url} />
-        <meta property="og:type" content="article" />
-        <meta property="og:title" content={guide.title} />
-        <meta property="og:description" content={guide.description} />
-        <meta property="og:url" content={url} />
+      <Seo
+        title={guide.title}
+        description={guide.description}
+        path={`/guides/${guide.slug}`}
+        type="article"
+      >
         <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
-      </Head>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
+      </Seo>
 
       {/* Fil d'Ariane */}
       <nav className="flex items-center gap-1 text-xs text-navy-400" aria-label="Fil d'Ariane">

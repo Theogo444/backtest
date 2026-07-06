@@ -5,45 +5,29 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="mask-icon" href="/mask-icon.svg" color="#1e3a5f" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1e3a5f" />
+    <meta name="author" content="Sereo" />
 
-    <!-- SEO : titre, description et lien canonique sont injectés PAR PAGE via le
-         composant Head (vite-react-ssg / react-helmet-async). Aucun titre
-         statique ici, pour eviter les doublons au pre-rendu. -->
-    <meta name="keywords" content="simulateur portefeuille, backtest, DCA, PEA, CTO, assurance-vie, investissement, ETF, MSCI World, S&P 500, value averaging, bourse, épargne" />
-    <meta name="author" content="Simulateur de Portefeuille FR" />
-
-    <!-- Open Graph (partage réseaux sociaux) -->
-    <meta property="og:type" content="website" />
+    <!-- SEO : titre, description, canonical, Open Graph et Twitter Card sont
+         injectés PAR PAGE via le composant Seo (vite-react-ssg / Head). Seules
+         les balises identiques sur tout le site restent ici. -->
     <meta property="og:locale" content="fr_FR" />
-    <meta property="og:title" content="Simulateur de Portefeuille — PEA, CTO, Assurance-vie | Backtest gratuit" />
-    <meta
-      property="og:description"
-      content="Simulez et backtestez vos stratégies d'investissement (DCA, Value Averaging, Lump Sum) sur PEA, CTO ou Assurance-vie. Gratuit."
-    />
-    <meta property="og:url" content="https://simulateur-portefeuille.fr/" />
-    <meta property="og:site_name" content="Simulateur de Portefeuille FR" />
-
-    <!-- Twitter Card -->
+    <meta property="og:site_name" content="Sereo" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Simulateur de Portefeuille — PEA, CTO, Assurance-vie" />
-    <meta name="twitter:description" content="Backtestez vos stratégies d'investissement gratuitement. PEA, CTO, Assurance-vie." />
 
-    <!-- Police Inter via Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Police Inter auto-hébergée (@fontsource, importée dans src/main.jsx) :
+         aucune requête vers Google Fonts (RGPD + performance). -->
 
     <!-- Données structurées schema.org : application web -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        "name": "Simulateur de Portefeuille FR",
+        "name": "Sereo",
+        "alternateName": "Simulateur de Portefeuille FR",
+        "url": "https://simulateur-portefeuille.fr/",
         "applicationCategory": "FinanceApplication",
         "operatingSystem": "Web",
         "description": "Simulateur et backtest de portefeuille d'investissement pour particuliers français (PEA, CTO, Assurance-vie).",

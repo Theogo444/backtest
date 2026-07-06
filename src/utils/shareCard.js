@@ -59,7 +59,7 @@ export async function generateShareCardPng(model) {
   // Marque
   ctx.fillStyle = 'rgba(255,255,255,0.75)'
   ctx.font = `600 26px ${FONT}`
-  ctx.fillText('simulateur-portefeuille.fr', PAD, 86)
+  ctx.fillText('Sereo — simulateur-portefeuille.fr', PAD, 86)
 
   // Eyebrow
   if (model.eyebrow) {

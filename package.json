@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Simulateur et backtest de portefeuille d'investissement pour particuliers français (PEA, CTO, Assurance-vie).",
+  "description": "Sereo — simulateur et backtest de portefeuille d'investissement pour particuliers français (PEA, CTO, Assurance-vie).",
   "scripts": {
     "dev": "vite",
     "pdf": "node scripts/generate-pea-pdf.mjs",
@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.8",
     "lucide-react": "^0.460.0",
     "marked": "^18.0.5",
     "react": "^18.3.1",

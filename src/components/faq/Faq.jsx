@@ -3,7 +3,8 @@
 //  Beaucoup de questions classées par catégorie, avec recherche et filtre.
 // ============================================================================
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
+import { Head } from 'vite-react-ssg'
 import { Link } from 'react-router-dom'
 import {
   HelpCircle, ChevronDown, Search, Rocket, Scale, Wallet, LineChart,
@@ -210,26 +211,17 @@ export default function Faq() {
   const [query, setQuery] = useState('')
   const [activeCat, setActiveCat] = useState('all')
 
-  // Balisage schema.org FAQPage (SEO) injecté dans le <head>
-  useEffect(() => {
-    const script = document.createElement('script')
-    script.type = 'application/ld+json'
-    script.id = 'faq-page-schema'
-    script.textContent = JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: ALL.map((t) => ({
-        '@type': 'Question',
-        name: t.q,
-        acceptedAnswer: { '@type': 'Answer', text: t.a },
-      })),
-    })
-    document.head.appendChild(script)
-    return () => {
-      const el = document.getElementById('faq-page-schema')
-      if (el) el.remove()
-    }
-  }, [])
+  // Balisage schema.org FAQPage — via <Head> pour être présent dans le HTML
+  // pré-rendu (les crawlers le voient sans exécuter le JavaScript).
+  const faqSchema = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: ALL.map((t) => ({
+      '@type': 'Question',
+      name: t.q,
+      acceptedAnswer: { '@type': 'Answer', text: t.a },
+    })),
+  })
 
   const q = query.trim().toLowerCase()
   const visibleCategories = useMemo(
@@ -249,6 +241,9 @@ export default function Faq() {
 
   return (
     <section>
+      <Head>
+        <script type="application/ld+json">{faqSchema}</script>
+      </Head>
       <header className="mb-5">
         <h1 className="flex items-center gap-2 text-2xl font-extrabold text-navy-800 dark:text-white md:text-3xl">
           <HelpCircle size={26} /> Foire aux questions

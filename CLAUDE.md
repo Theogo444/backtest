@@ -1,4 +1,4 @@
-# Simulateur de Portefeuille — référentiel projet
+# Sereo (Simulateur de Portefeuille) — référentiel projet
 
 ## Stack
 React 18 + Vite · **vite-react-ssg** (pré-rendu statique) + **react-router-dom** · TailwindCSS 3 · Recharts · lucide-react · tout côté client (pas de backend) · déployé sur Vercel. Build = `npm run build` (génère le sitemap puis pré-rend 1 HTML/route).
@@ -10,7 +10,7 @@ React 18 + Vite · **vite-react-ssg** (pré-rendu statique) + **react-router-dom
 - `/confidentialite` (RGPD ; identité éditeur en `[À COMPLÉTER]`).
 
 ## Routing / SEO (cf. mémoire `ssg-routing-architecture`)
-- SEO par page via `<Head>` (title/description/canonical) — **pas** de title statique dans `index.html`.
+- SEO par page via `src/components/Seo.jsx` (title + description + canonical + Open Graph/Twitter ; suffixe « | Sereo » automatique) — **pas** de title/OG par page dans `index.html` (seuls og:locale, og:site_name, twitter:card y restent). Image sociale : `public/og-image.jpg` (1200×630).
 - `manualChunks` désactivé au build SSR (`isSsrBuild`).
 - **404 réel** : `NotFound.jsx` sur route `/404` (→ `dist/404.html`) + catch-all `*`. `vercel.json` SANS rewrite SPA → vrai HTTP 404. ⚠️ Ne pas réintroduire le rewrite.
 - **Sitemap généré** au build : `scripts/generate-sitemap.mjs` (ne pas éditer `sitemap.xml` à la main).
@@ -50,7 +50,7 @@ launchctl kickstart -k gui/$(id -u)/com.backtest.daily-refresh  # test immédiat
 - **Analytics** : `utils/track.js` (no-op tant qu'aucun GA4/GTM/Plausible branché).
 
 ## Design
-Bleu marine `#1e3a5f` · blanc · vert gains / rouge pertes · Inter · responsive mobile-first · mode sombre/clair.
+Marque **Sereo** (logo dot-plot, cf. mémoire `design-system-tokens`) · bleu marine `#1e3a5f` · blanc · vert gains / rouge pertes · Inter **auto-hébergée** (`@fontsource/inter`, importée dans `main.jsx` — pas de Google Fonts, RGPD) · responsive mobile-first · mode sombre/clair · manifest PWA `public/site.webmanifest` + icônes 192/512.
 
 ## Fiscalité FR implémentée
 - PEA : exonération PV après 5 ans (hors PS 17,2 %)

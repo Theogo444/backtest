@@ -10,7 +10,7 @@
 //    - BREVO_LIST_ID   (optionnel)    id liste cible (défaut : 2)
 //    - SENDER_EMAIL    (optionnel)    expéditeur VÉRIFIÉ dans Brevo
 //                                     (défaut : contact@simulateur-portefeuille.fr)
-//    - SENDER_NAME     (optionnel)    nom expéditeur (défaut : Simulateur de Portefeuille FR)
+//    - SENDER_NAME     (optionnel)    nom expéditeur (défaut : Sereo)
 //    - PDF_URL         (optionnel)    URL du PDF (défaut : domaine de prod)
 //
 //  ⚠️ L'expéditeur DOIT être un sender vérifié dans Brevo (Senders & IP), sinon
@@ -80,7 +80,7 @@ async function addContact({ email, source, leadMagnet, listId, headers }) {
 
 async function sendWelcomeEmail({ email, headers, base }) {
   const senderEmail = process.env.SENDER_EMAIL || 'contact@simulateur-portefeuille.fr'
-  const senderName = process.env.SENDER_NAME || 'Simulateur de Portefeuille FR'
+  const senderName = process.env.SENDER_NAME || 'Sereo — Simulateur de portefeuille'
   const pdfUrl = process.env.PDF_URL || `${base}/comparatif-pea-2026.pdf`
 
   await fetch(`${BREVO}/smtp/email`, {
@@ -101,7 +101,7 @@ function emailHtml(pdfUrl, base = SITE) {
   <div style="max-width:560px;margin:0 auto;padding:24px">
     <div style="background:#1e3a5f;border-radius:12px 12px 0 0;padding:20px 24px;color:#fff">
       <div style="font-size:20px;font-weight:800">Votre comparatif PEA 2026</div>
-      <div style="font-size:13px;color:#9fb8d6;margin-top:2px">simulateur-portefeuille.fr</div>
+      <div style="font-size:13px;color:#9fb8d6;margin-top:2px">Sereo · simulateur-portefeuille.fr</div>
     </div>
     <div style="background:#fff;border-radius:0 0 12px 12px;padding:24px;font-size:15px;line-height:1.6">
       <p>Bonjour,</p>

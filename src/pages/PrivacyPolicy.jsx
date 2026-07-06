@@ -3,21 +3,18 @@
 //  Base RGPD minimale (données email, finalité, droits, cookies, sous-traitant).
 // ============================================================================
 
-import { Head } from 'vite-react-ssg'
+import Seo from '../components/Seo'
 
 const UPDATED = '28 juin 2026'
 
 export default function PrivacyPolicy() {
   return (
     <>
-      <Head>
-        <title>Politique de confidentialité | Simulateur de Portefeuille FR</title>
-        <meta
-          name="description"
-          content="Comment Simulateur de Portefeuille FR collecte et utilise vos données (email). Vos droits RGPD et comment les exercer."
-        />
-        <link rel="canonical" href="https://simulateur-portefeuille.fr/confidentialite" />
-      </Head>
+      <Seo
+        title="Politique de confidentialité"
+        description="Comment Sereo (simulateur-portefeuille.fr) collecte et utilise vos données (email). Vos droits RGPD et comment les exercer."
+        path="/confidentialite"
+      />
 
       <article className="mx-auto max-w-2xl">
         <h1 className="text-3xl font-extrabold text-navy-800 dark:text-white md:text-4xl">

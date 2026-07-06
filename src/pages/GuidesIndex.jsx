@@ -2,9 +2,9 @@
 //  GuidesIndex.jsx — liste des guides (/guides).
 // ============================================================================
 
-import { Head } from 'vite-react-ssg'
 import { Link } from 'react-router-dom'
 import { Clock, ArrowRight, Newspaper } from 'lucide-react'
+import Seo from '../components/Seo'
 import { GUIDES } from '../data/guides'
 
 function formatDate(d) {
@@ -14,14 +14,11 @@ function formatDate(d) {
 export default function GuidesIndex() {
   return (
     <>
-      <Head>
-        <title>Guides pour investir en France : PEA, ETF, fiscalité | Conseils gratuits</title>
-        <meta
-          name="description"
-          content="Tous nos guides pour investir efficacement en France : choisir son PEA, comprendre la fiscalité, investir en DCA sur ETF, PEA ou CTO… Conseils clairs et gratuits."
-        />
-        <link rel="canonical" href="https://simulateur-portefeuille.fr/guides" />
-      </Head>
+      <Seo
+        title="Guides pour investir en France — PEA, ETF, fiscalité"
+        description="Tous nos guides pour investir efficacement en France : choisir son PEA, comprendre la fiscalité, investir en DCA sur ETF, PEA ou CTO… Conseils clairs et gratuits."
+        path="/guides"
+      />
 
       <header className="card bg-gradient-to-br from-navy-800 to-navy-950 text-white ring-navy-800">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-navy-200">
