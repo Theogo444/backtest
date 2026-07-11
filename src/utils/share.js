@@ -112,12 +112,13 @@ export function encodeBeginnerState(state) {
   if (assets) p.set('assets', assets)
   if (state.planId) p.set('plan', state.planId)
   if (state.amount != null) p.set('amount', String(state.amount))
+  if (Number(state.initialAmount) > 0) p.set('init', String(state.initialAmount))
   if (state.period) p.set('period', state.period)
   if (state.autoRebalance) p.set('rebal', '1')
   return p.toString()
 }
 
-const BEGINNER_KEYS = ['broker', 'env', 'assets', 'plan', 'amount', 'period']
+const BEGINNER_KEYS = ['broker', 'env', 'assets', 'plan', 'amount', 'init', 'period']
 
 export function decodeBeginnerState(searchParams) {
   if (!BEGINNER_KEYS.some((k) => searchParams.has(k))) return null
@@ -130,6 +131,7 @@ export function decodeBeginnerState(searchParams) {
   }
   if (searchParams.has('plan')) out.planId = searchParams.get('plan')
   if (searchParams.has('amount')) { const v = num(searchParams.get('amount')); if (v != null) out.amount = v }
+  if (searchParams.has('init')) { const v = num(searchParams.get('init')); if (v != null) out.initialAmount = v }
   if (searchParams.has('period')) out.period = searchParams.get('period')
   if (searchParams.get('rebal') === '1') out.autoRebalance = true
   return out

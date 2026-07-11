@@ -1,13 +1,12 @@
 // ============================================================================
 //  BeginnerSimulator.jsx — simulateur guidé pour débutants.
-//  Parcours en étapes : courtier → enveloppe → actifs → montant & plan →
-//  résultat clair, avec graphique simple et phrase de synthèse.
-//
-//  Mise en page « de haut en bas » : EN HAUT les 4 étapes de configuration
-//  (formulaire groupé sur fond teinté, grille 2 colonnes sur desktop, ordre
-//  1→2→3→4), PLUS BAS le résultat en pleine largeur. Le courtier se choisit
-//  dans un menu déroulant et renvoie vers le comparatif complet. Une aide
-//  calcule un montant mensuel à partir des revenus.
+//  Parcours « de haut en bas » en 3 zones pleine largeur :
+//    1. Votre situation financière (ProfileAdvisor) : foyer, revenus, charges,
+//       crédits, épargne, projet → diagnostic + plan suggéré (toujours en DCA)
+//       que l'on peut APPLIQUER d'un clic aux étapes suivantes.
+//    2. Configuration en 4 étapes (grille 2 colonnes) : courtier (menu
+//       déroulant) → enveloppe → actifs → montant & plan.
+//    3. Résultat clair : graphique simple + phrase de synthèse.
 //
 //  Réutilise le moteur du simulateur avancé (useSimulation) et le calcul fiscal
 //  (compareEnvelopes). Les frais du courtier choisi alimentent le moteur.
@@ -20,9 +19,10 @@ import {
 } from 'recharts'
 import {
   Rocket, Coins, CalendarClock, TrendingDown, PiggyBank, Wallet, Landmark,
-  Check, ArrowRight, Info, AlertTriangle, Sparkles, Calculator, ChevronDown,
+  Check, ArrowRight, ArrowUp, Info, AlertTriangle, Sparkles, Calculator, ChevronDown,
 } from 'lucide-react'
 import AssetSearch from './AssetSearch'
+import ProfileAdvisor from './ProfileAdvisor'
 import ShareResult from '../marketing/ShareResult'
 import EmailCapture from '../marketing/EmailCapture'
 import { useSimulation } from '../../hooks/useSimulation'
@@ -30,6 +30,7 @@ import { compareEnvelopes } from '../../utils/fiscalite'
 import { formatEUR, formatPct } from '../../utils/metrics'
 import { BROKERS, getBroker, brokerFeeConfig, ENVELOPE_LABELS, FEES_AS_OF } from '../../data/brokers'
 import { encodeBeginnerState, decodeBeginnerState, buildShareUrl } from '../../utils/share'
+import { track } from '../../utils/track'
 
 // ---------------------------------------------------------------------------
 //  Métadonnées éditoriales
@@ -94,10 +95,40 @@ export default function BeginnerSimulator({ marketData }) {
   const [autoRebalance, setAutoRebalance] = useState(false)
   const [planId, setPlanId] = useState('dca')
   const [amount, setAmount] = useState(200)
+  const [initialAmount, setInitialAmount] = useState(0) // versement de départ (plans mensuels)
   const [period, setPeriod] = useState('10y')
 
   const broker = getBroker(brokerId)
   const plan = PLANS.find((p) => p.id === planId) || PLANS[0]
+
+  // Ancres de défilement : zone situation (1) et zone configuration (2).
+  const advisorRef = useRef(null)
+  const configRef = useRef(null)
+
+  // Applique le plan suggéré par ProfileAdvisor aux 4 étapes. La stratégie
+  // appliquée est toujours le DCA ; si le courtier courant ne propose pas
+  // l'enveloppe suggérée, on bascule sur le premier courtier qui la propose.
+  const applyAdvice = (advice) => {
+    setPlanId('dca')
+    setAmount(advice.monthlyInvest)
+    setInitialAmount(advice.initialInvest || 0)
+    setPeriod(advice.period)
+    setEnvelope(advice.portfolio.envelope)
+    setSelectedAssets(advice.portfolio.assets.map(({ id, allocation }) => ({ id, allocation })))
+    setAutoRebalance(advice.portfolio.autoRebalance)
+    if (!broker.accounts.includes(advice.portfolio.envelope)) {
+      const b = BROKERS.find((x) => x.accounts.includes(advice.portfolio.envelope))
+      if (b) setBrokerId(b.id)
+    }
+    track('advisor_apply', {
+      monthly: advice.monthlyInvest,
+      initial: advice.initialInvest,
+      envelope: advice.portfolio.envelope,
+      risk: advice.risk,
+      period: advice.period,
+    })
+    requestAnimationFrame(() => configRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+  }
 
   // Le courtier choisi ne propose pas l'enveloppe courante → on bascule.
   useEffect(() => {
@@ -117,6 +148,7 @@ export default function BeginnerSimulator({ marketData }) {
     if (s.selectedAssets) setSelectedAssets(s.selectedAssets)
     if (s.planId) setPlanId(s.planId)
     if (s.amount != null) setAmount(s.amount)
+    if (s.initialAmount != null) setInitialAmount(s.initialAmount)
     if (s.period) setPeriod(s.period)
     if (s.autoRebalance) setAutoRebalance(s.autoRebalance)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -126,12 +158,13 @@ export default function BeginnerSimulator({ marketData }) {
   const cfg = useMemo(() => {
     const { fees, feeAnnualMgmt } = brokerFeeConfig(broker, envelope)
     const a = Number(amount) || 0
+    const init = Number(initialAmount) || 0 // versement de départ des plans mensuels
     const params =
       plan.id === 'lump-sum'
         ? { initialAmount: a }
         : plan.id === 'dca'
-          ? { initialAmount: 0, dcaAmount: a, frequency: 'monthly' }
-          : { initialAmount: 0, baseAmount: a, multiplier: 2, threshold: 10 }
+          ? { initialAmount: init, dcaAmount: a, frequency: 'monthly' }
+          : { initialAmount: init, baseAmount: a, multiplier: 2, threshold: 10 }
     return {
       selectedAssets,
       allAssets: assets,
@@ -145,7 +178,7 @@ export default function BeginnerSimulator({ marketData }) {
       autoRebalance,
       benchmarkId: 'msci-world',
     }
-  }, [broker, envelope, amount, plan.id, selectedAssets, assets, period, autoRebalance])
+  }, [broker, envelope, amount, initialAmount, plan.id, selectedAssets, assets, period, autoRebalance])
 
   const result = useSimulation(cfg)
 
@@ -188,21 +221,17 @@ export default function BeginnerSimulator({ marketData }) {
 
   const picks = plan.kind === 'monthly' ? MONTHLY_PICKS : ONEOFF_PICKS
 
-  // Applique un montant mensuel suggéré (bascule sur le plan DCA).
-  const applyMonthlyAmount = (v) => {
-    setPlanId('dca')
-    setAmount(v)
-  }
-
-  // Lien partageable + carte PNG (reflètent les choix courants).
+  // Lien partageable + carte PNG (reflètent les choix courants — jamais les
+  // informations personnelles saisies dans « Votre situation »).
   const shareUrl = buildShareUrl(
     '/simulateur-debutant',
-    encodeBeginnerState({ brokerId, envelope, selectedAssets, planId, amount, period, autoRebalance }),
+    encodeBeginnerState({ brokerId, envelope, selectedAssets, planId, amount, initialAmount, period, autoRebalance }),
   )
+  const initForCard = plan.kind === 'monthly' ? Number(initialAmount) || 0 : 0
   const shareCard = summary
     ? {
         eyebrow: `${broker.name} · ${ENVELOPE_LABELS[envelope]}`,
-        headline: `${plan.kind === 'monthly' ? `${formatEUR(Number(amount) || 0)}/mois` : formatEUR(Number(amount) || 0)} sur ${assetNames.length <= 1 ? assetNames[0] || 'votre portefeuille' : `${assetNames.length} actifs`} pendant ${summary.years} ans`,
+        headline: `${plan.kind === 'monthly' ? `${formatEUR(Number(amount) || 0)}/mois${initForCard > 0 ? ` (+${formatEUR(initForCard)} au départ)` : ''}` : formatEUR(Number(amount) || 0)} sur ${assetNames.length <= 1 ? assetNames[0] || 'votre portefeuille' : `${assetNames.length} actifs`} pendant ${summary.years} ans`,
         bigValue: formatEUR(summary.netFinal),
         bigLabel: `Valeur finale nette · ${formatEUR(summary.totalInvested)} investis`,
         stats: [
@@ -221,17 +250,29 @@ export default function BeginnerSimulator({ marketData }) {
           <Rocket size={26} /> Simulateur débutant
         </h1>
         <p className="mt-1 text-sm text-navy-500 dark:text-navy-400">
-          En 4 étapes simples, voyez ce que votre épargne aurait pu devenir. Remplissez les étapes
-          ci-dessous : votre résultat apparaît juste en dessous et s'actualise tout seul.
+          Dites-nous d'abord où vous en êtes : nous calculons combien vous pouvez investir chaque
+          mois, sans mettre votre budget en danger. Configurez ensuite votre simulation en 4 étapes —
+          le résultat s'actualise tout seul, frais et impôts déduits.
         </p>
       </header>
 
-      {/* ======================= EN HAUT : LES 4 ÉTAPES ======================= */}
-      <div className="mb-8">
+      {/* ================== ZONE 1 : VOTRE SITUATION FINANCIÈRE ================== */}
+      <div className="mb-8 scroll-mt-24" ref={advisorRef}>
+        <ZoneHeader
+          kicker="Faites le point"
+          title="1. Votre situation financière"
+          hint="Quelques questions (2 minutes) pour recevoir une suggestion personnalisée : montant mensuel, enveloppe, portefeuille. Vous savez déjà combien investir ? Passez directement à l'étape 2."
+          tone="profile"
+        />
+        <ProfileAdvisor onApply={applyAdvice} />
+      </div>
+
+      {/* ==================== ZONE 2 : LES 4 ÉTAPES DE RÉGLAGE ==================== */}
+      <div className="mb-8 scroll-mt-24" ref={configRef}>
         <ZoneHeader
           kicker="Étape par étape"
-          title="1. Configurez votre simulation"
-          hint="Renseignez les 4 étapes ci-dessous. Votre résultat s'affiche juste après, frais et impôts déduits."
+          title="2. Configurez votre simulation"
+          hint="Renseignez les 4 étapes ci-dessous — ou appliquez le plan suggéré en zone 1. Votre résultat s'affiche juste après, frais et impôts déduits."
           tone="form"
         />
         <div className="rounded-3xl bg-navy-100/50 p-3 ring-1 ring-navy-100 dark:bg-navy-900/40 dark:ring-navy-800 sm:p-4">
@@ -355,8 +396,19 @@ export default function BeginnerSimulator({ marketData }) {
             <div className="card">
               <StepTitle n={4} title="Combien et comment ?" />
 
-              {/* Aide : combien investir chaque mois ? */}
-              <MonthlyAmountHelper onApply={applyMonthlyAmount} />
+              {/* Renvoi vers la zone 1 (qui calcule un montant personnalisé) */}
+              <button
+                type="button"
+                onClick={() => advisorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                className="flex w-full items-start gap-2 rounded-xl border border-dashed border-navy-300 p-3 text-left transition hover:border-navy-500 dark:border-navy-700"
+              >
+                <Calculator size={15} className="mt-0.5 shrink-0 text-navy-500 dark:text-navy-300" />
+                <span className="text-xs leading-snug text-navy-600 dark:text-navy-300">
+                  <strong className="font-bold">Pas sûr du montant ?</strong> Remontez à l'étape 1 «
+                  Votre situation » : nous calculons une suggestion adaptée à votre budget.{' '}
+                  <ArrowUp size={12} className="inline" />
+                </span>
+              </button>
 
               <label className="label mt-4">{plan.amountLabel}</label>
               <div className="flex items-center gap-2">
@@ -387,6 +439,29 @@ export default function BeginnerSimulator({ marketData }) {
                   </button>
                 ))}
               </div>
+
+              {/* Versement de départ (plans mensuels uniquement) */}
+              {plan.kind === 'monthly' && (
+                <>
+                  <label className="label mt-4">
+                    Versement initial{' '}
+                    <span className="font-normal normal-case text-navy-400">(optionnel)</span>
+                  </label>
+                  <div className="flex items-center rounded-lg border border-navy-200 bg-white px-3 py-2 focus-within:border-navy-500 dark:border-navy-700 dark:bg-navy-800">
+                    <input
+                      type="number" min="0" step="100" inputMode="numeric"
+                      value={initialAmount || ''}
+                      placeholder="0"
+                      onChange={(e) => setInitialAmount(e.target.value)}
+                      className="w-full bg-transparent text-sm font-semibold tabular-nums outline-none placeholder:font-normal placeholder:text-navy-400"
+                    />
+                    <span className="text-xs font-semibold text-navy-400">€</span>
+                  </div>
+                  <p className="mt-1 text-[11px] leading-snug text-navy-400">
+                    Un capital investi dès le premier mois, en plus de vos versements mensuels.
+                  </p>
+                </>
+              )}
 
               <label className="label mt-4">Votre plan d'investissement</label>
               <div className="space-y-2">
@@ -435,11 +510,11 @@ export default function BeginnerSimulator({ marketData }) {
         </div>
       </div>
 
-      {/* ======================= PLUS BAS : LE RÉSULTAT ======================= */}
+      {/* ======================= ZONE 3 : LE RÉSULTAT ======================= */}
       <div>
         <ZoneHeader
           kicker="Votre résultat"
-          title="2. Ce que votre épargne aurait donné"
+          title="3. Ce que votre épargne aurait donné"
           hint="Actualisé automatiquement à chaque changement, frais et impôts déduits."
           tone="result"
         />
@@ -457,6 +532,7 @@ export default function BeginnerSimulator({ marketData }) {
                 envelope={envelope}
                 plan={plan}
                 amount={Number(amount) || 0}
+                initialAmount={plan.kind === 'monthly' ? Number(initialAmount) || 0 : 0}
                 assetNames={assetNames}
                 summary={summary}
                 chartData={chartData}
@@ -489,7 +565,7 @@ export default function BeginnerSimulator({ marketData }) {
 //  Sous-composants
 // ---------------------------------------------------------------------------
 function ZoneHeader({ kicker, title, hint, tone }) {
-  const dot = tone === 'result' ? 'bg-gain' : 'bg-navy-800'
+  const dot = tone === 'result' ? 'bg-gain' : tone === 'profile' ? 'bg-emerald-400' : 'bg-navy-800'
   return (
     <div className="mb-3">
       <div className="flex items-center gap-2">
@@ -510,119 +586,6 @@ function StepTitle({ n, title, className = 'mb-3' }) {
       </span>
       {title}
     </h3>
-  )
-}
-
-// Aide repliable : propose un montant mensuel à partir des revenus.
-function MonthlyAmountHelper({ onApply }) {
-  const [open, setOpen] = useState(false)
-  const [income, setIncome] = useState('')
-  const [future, setFuture] = useState('')
-  const [rate, setRate] = useState(10)
-
-  const round10 = (n) => Math.max(10, Math.round(n / 10) * 10)
-  const inc = Number(income) || 0
-  const fut = Number(future) || 0
-  const suggested = inc > 0 ? round10((inc * rate) / 100) : 0
-  const suggestedFuture = fut > 0 ? round10((fut * rate) / 100) : 0
-
-  const RATES = [
-    { v: 5, label: 'Prudent' },
-    { v: 10, label: 'Équilibré' },
-    { v: 20, label: 'Ambitieux' },
-  ]
-
-  return (
-    <div className="rounded-xl border border-dashed border-navy-300 p-3 dark:border-navy-700">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
-        className="flex w-full items-center justify-between gap-2 text-left"
-      >
-        <span className="flex items-center gap-2 text-sm font-bold text-navy-700 dark:text-navy-200">
-          <Calculator size={15} /> Pas sûr du montant ? Calculez-le
-        </span>
-        <ChevronDown size={16} className={`shrink-0 text-navy-400 transition ${open ? 'rotate-180' : ''}`} />
-      </button>
-
-      {open && (
-        <div className="mt-3 space-y-3">
-          <div>
-            <label className="label">Votre revenu net mensuel</label>
-            <MoneyInput value={income} onChange={setIncome} placeholder="ex : 2 200" />
-          </div>
-
-          <div>
-            <label className="label">Quelle part épargner ?</label>
-            <div className="flex flex-wrap gap-1.5">
-              {RATES.map((r) => (
-                <button
-                  key={r.v}
-                  type="button"
-                  onClick={() => setRate(r.v)}
-                  className={`rounded-full border px-2.5 py-1 text-xs font-semibold transition ${
-                    rate === r.v
-                      ? 'border-navy-800 bg-navy-800 text-white'
-                      : 'border-navy-200 text-navy-600 hover:border-navy-400 dark:border-navy-700 dark:text-navy-300'
-                  }`}
-                >
-                  {r.label} · {r.v} %
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="label">Revenu net estimé dans 5 ans <span className="font-normal normal-case text-navy-400">(optionnel)</span></label>
-            <MoneyInput value={future} onChange={setFuture} placeholder="ex : 2 800" />
-          </div>
-
-          {suggested > 0 ? (
-            <div className="rounded-xl bg-gradient-to-br from-navy-800 to-navy-950 p-3 text-white">
-              <div className="text-[11px] font-semibold uppercase tracking-wide text-navy-200">Montant suggéré</div>
-              <div className="text-2xl font-extrabold tabular-nums">
-                {formatEUR(suggested)}<span className="text-sm font-semibold text-navy-200"> /mois</span>
-              </div>
-              {suggestedFuture > 0 && (
-                <p className="mt-1 text-xs text-navy-200">
-                  Dans 5 ans, au même effort d'épargne&nbsp;: ~{formatEUR(suggestedFuture)}/mois.
-                </p>
-              )}
-              <button
-                type="button"
-                onClick={() => onApply(suggested)}
-                className="btn-primary mt-2.5 bg-white !text-navy-900 hover:bg-navy-50"
-              >
-                Utiliser ce montant <ArrowRight size={15} />
-              </button>
-            </div>
-          ) : (
-            <p className="text-xs text-navy-400">Renseignez votre revenu pour obtenir une suggestion.</p>
-          )}
-
-          <p className="text-[11px] leading-snug text-navy-400">
-            Règle simple et indicative : n'investissez qu'une part de vos revenus dont vous n'aurez pas
-            besoin avant plusieurs années, et gardez toujours une épargne de précaution disponible.
-          </p>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function MoneyInput({ value, onChange, placeholder }) {
-  return (
-    <div className="flex items-center rounded-lg border border-navy-200 bg-white px-3 py-2 focus-within:border-navy-500 dark:border-navy-700 dark:bg-navy-800">
-      <input
-        type="number" min="0" step="50"
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-transparent text-sm font-semibold tabular-nums outline-none placeholder:font-normal placeholder:text-navy-400"
-      />
-      <span className="text-xs font-semibold text-navy-400">€/mois</span>
-    </div>
   )
 }
 
@@ -653,10 +616,14 @@ function PlanOption({ plan, selected, onSelect }) {
 // ---------------------------------------------------------------------------
 //  Panneau de résultat
 // ---------------------------------------------------------------------------
-function ResultPanel({ broker, envelope, plan, amount, assetNames, summary, chartData }) {
+function ResultPanel({ broker, envelope, plan, amount, initialAmount = 0, assetNames, summary, chartData }) {
   const positive = summary.netGain >= 0
   const amountPhrase =
-    plan.kind === 'monthly' ? `${formatEUR(amount)} par mois` : `${formatEUR(amount)} en une fois`
+    plan.kind === 'monthly'
+      ? initialAmount > 0
+        ? `${formatEUR(initialAmount)} au départ puis ${formatEUR(amount)} par mois`
+        : `${formatEUR(amount)} par mois`
+      : `${formatEUR(amount)} en une fois`
   const assetsPhrase =
     assetNames.length === 0
       ? 'votre portefeuille'

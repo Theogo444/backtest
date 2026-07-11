@@ -7,8 +7,8 @@ export default function BeginnerSimulatorPage() {
   return (
     <>
       <Seo
-        title="Simulateur d'investissement débutant — PEA, ETF"
-        description="Simulateur d'investissement pour débutants : choisissez votre courtier, votre enveloppe (PEA, CTO, AV), vos ETF et votre plan. Voyez en un clic ce que votre épargne aurait rapporté."
+        title="Simulateur d'investissement débutant — combien investir chaque mois ?"
+        description="Décrivez votre situation (foyer, revenus, charges, crédits, épargne) : nous calculons combien investir chaque mois en DCA, avec quelle enveloppe (PEA, CTO, AV) et quel portefeuille — puis simulons le résultat sur données réelles."
         path="/simulateur-debutant"
       />
       <BeginnerSimulator marketData={marketData} />
